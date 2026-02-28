@@ -1,7 +1,93 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LESSONS } from "./data/lessons";
 
 type Tier = "emerging" | "developing" | "expanding" | "abstract";
+
+type Prompts = {
+  meaningTitle: string;
+  meaningQuestion: (word: string) => string;
+
+  structureTitle: string;
+  structureQuestion: string;
+
+  relatedTitle: string;
+  relatedQuestion: (base: string) => string;
+
+  graphemeTitle: string;
+  graphemeQuestion: (suffix: string) => string;
+
+  checkJoinLabel: string;
+};
+
+function getPrompts(tier: Tier): Prompts {
+  switch (tier) {
+    case "emerging":
+      return {
+        meaningTitle: "1. Meaning",
+        meaningQuestion: (word) => `What does ${word} mean here? Use your own words.`,
+        structureTitle: "2. Structure Hypothesis",
+        structureQuestion: "Circle what you think is the base. What do you think was added?",
+        relatedTitle: "3. Related Words (Evidence)",
+        relatedQuestion: (base) =>
+          `Write words that belong with ${base}. You can start with: base word, base + s, base + ed.`,
+        graphemeTitle: "4. Grapheme Function",
+        graphemeQuestion: (suffix) =>
+          `What does <-${suffix}> help this word mean? (Ongoing? Past? More than one?)`,
+        checkJoinLabel: "Check the Join",
+      };
+
+    case "developing":
+      return {
+        meaningTitle: "1. Meaning",
+        meaningQuestion: (word) =>
+          `What does ${word} mean in this sentence? Point to the part of the sentence that helps you know.`,
+        structureTitle: "2. Structure Hypothesis",
+        structureQuestion:
+          "What is the base? What suffix might be attached? Write your hypothesis before checking.",
+        relatedTitle: "3. Related Words (Evidence)",
+        relatedQuestion: (base) =>
+          `List at least 3 words related to ${base}. Which one best proves your base choice?`,
+        graphemeTitle: "4. Grapheme Function",
+        graphemeQuestion: (suffix) =>
+          `Explain how <-${suffix}> is functioning in this word. What meaning does it add?`,
+        checkJoinLabel: "Check the Join",
+      };
+
+    case "expanding":
+      return {
+        meaningTitle: "1. Meaning",
+        meaningQuestion: (word) =>
+          `Explain the meaning of ${word} in context. If the word is doing a job in the sentence, name the job.`,
+        structureTitle: "2. Structure Hypothesis",
+        structureQuestion:
+          "Identify the base and suffix. Then explain what changed (or did not change) at the join and why.",
+        relatedTitle: "3. Related Words (Evidence)",
+        relatedQuestion: (base) =>
+          `Build a small word family for ${base} (4+ words). Use it as evidence for your structure.`,
+        graphemeTitle: "4. Grapheme Function",
+        graphemeQuestion: (suffix) =>
+          `Explain the meaning contribution of <-${suffix}> and connect it to your word family evidence.`,
+        checkJoinLabel: "Check the Join",
+      };
+
+    case "abstract":
+      return {
+        meaningTitle: "1. Meaning",
+        meaningQuestion: (word) =>
+          `Define ${word} in context and justify your interpretation using sentence evidence.`,
+        structureTitle: "2. Structure Hypothesis",
+        structureQuestion:
+          "Write the morphological analysis (base + suffix). Then justify the suffixing convention at the join using evidence.",
+        relatedTitle: "3. Related Words (Evidence)",
+        relatedQuestion: (base) =>
+          `Generate a word family for ${base}. Identify which relative word best confirms the base spelling.`,
+        graphemeTitle: "4. Grapheme Function",
+        graphemeQuestion: (suffix) =>
+          `Explain how <-${suffix}> functions (meaning + role). Cite structural evidence from your analysis.`,
+        checkJoinLabel: "Check the Join",
+      };
+  }
+}
 
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
@@ -38,6 +124,8 @@ export default function App() {
       </div>
     );
   }
+
+  const prompts = useMemo(() => getPrompts(tier), [tier]);
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -76,11 +164,9 @@ export default function App() {
 
       {/* 1. Meaning */}
       <section style={{ marginTop: "2rem" }}>
-        <h3>1. Meaning</h3>
+        <h3>{prompts.meaningTitle}</h3>
         <p>{lesson.sentence}</p>
-        <p>
-          What does <strong>{lesson.word}</strong> mean?
-        </p>
+        <p>{prompts.meaningQuestion(lesson.word)}</p>
 
         <textarea
           value={meaningResponse}
@@ -90,10 +176,10 @@ export default function App() {
         />
       </section>
 
-      {/* 2. Hypothesis About Structure */}
+      {/* 2. Structure Hypothesis */}
       <section style={{ marginTop: "2rem" }}>
-        <h3>2. Structure Hypothesis</h3>
-        <p>What base do you notice? What suffix might be attached?</p>
+        <h3>{prompts.structureTitle}</h3>
+        <p>{prompts.structureQuestion}</p>
 
         <textarea
           value={structureResponse}
@@ -107,7 +193,7 @@ export default function App() {
             onClick={() => setShowStructure(true)}
             style={{ marginTop: "0.5rem" }}
           >
-            Check the Join
+            {prompts.checkJoinLabel}
           </button>
         )}
 
@@ -125,12 +211,10 @@ export default function App() {
         )}
       </section>
 
-      {/* 3. Evidence */}
+      {/* 3. Related Words (Evidence) */}
       <section style={{ marginTop: "2rem" }}>
-        <h3>3. Related Words (Evidence)</h3>
-        <p>
-          What other words are related to <strong>{lesson.base}</strong>?
-        </p>
+        <h3>{prompts.relatedTitle}</h3>
+        <p>{prompts.relatedQuestion(lesson.base)}</p>
 
         <textarea
           value={relatedResponse}
@@ -146,12 +230,10 @@ export default function App() {
         )}
       </section>
 
-      {/* 4. Explanation */}
+      {/* 4. Grapheme Function */}
       <section style={{ marginTop: "2rem" }}>
-        <h3>4. Grapheme Function</h3>
-        <p>
-          How is the grapheme &lt;-{lesson.suffix}&gt; functioning in this word?
-        </p>
+        <h3>{prompts.graphemeTitle}</h3>
+        <p>{prompts.graphemeQuestion(lesson.suffix)}</p>
 
         <textarea
           value={graphemeResponse}
