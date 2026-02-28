@@ -6,17 +6,12 @@ type Tier = "emerging" | "developing" | "expanding" | "abstract";
 type Prompts = {
   meaningTitle: string;
   meaningQuestion: (word: string) => string;
-
   structureTitle: string;
   structureQuestion: string;
-
   relatedTitle: string;
   relatedQuestion: (base: string) => string;
-
   graphemeTitle: string;
   graphemeQuestion: (suffix: string) => string;
-
-  checkJoinLabel: string;
 };
 
 function getPrompts(tier: Tier): Prompts {
@@ -24,67 +19,49 @@ function getPrompts(tier: Tier): Prompts {
     case "emerging":
       return {
         meaningTitle: "1. Meaning",
-        meaningQuestion: (word) => `What does ${word} mean here? Use your own words.`,
+        meaningQuestion: (word) => `What does ${word} mean here?`,
         structureTitle: "2. Structure Hypothesis",
-        structureQuestion: "Circle what you think is the base. What do you think was added?",
+        structureQuestion:
+          "What do you think is the base? What do you think was added?",
         relatedTitle: "3. Related Words (Evidence)",
         relatedQuestion: (base) =>
-          `Write words that belong with ${base}. You can start with: base word, base + s, base + ed.`,
+          `Write words that belong with ${base}.`,
         graphemeTitle: "4. Grapheme Function",
         graphemeQuestion: (suffix) =>
-          `What does <-${suffix}> help this word mean? (Ongoing? Past? More than one?)`,
-        checkJoinLabel: "Check the Join",
+          `What does <-${suffix}> help this word mean?`,
       };
 
     case "developing":
       return {
         meaningTitle: "1. Meaning",
         meaningQuestion: (word) =>
-          `What does ${word} mean in this sentence? Point to the part of the sentence that helps you know.`,
+          `What does ${word} mean in this sentence?`,
         structureTitle: "2. Structure Hypothesis",
         structureQuestion:
           "What is the base? What suffix might be attached? Write your hypothesis before checking.",
         relatedTitle: "3. Related Words (Evidence)",
         relatedQuestion: (base) =>
-          `List at least 3 words related to ${base}. Which one best proves your base choice?`,
+          `List words related to ${base}.`,
         graphemeTitle: "4. Grapheme Function",
         graphemeQuestion: (suffix) =>
-          `Explain how <-${suffix}> is functioning in this word. What meaning does it add?`,
-        checkJoinLabel: "Check the Join",
+          `Explain how <-${suffix}> is functioning.`,
       };
 
     case "expanding":
-      return {
-        meaningTitle: "1. Meaning",
-        meaningQuestion: (word) =>
-          `Explain the meaning of ${word} in context. If the word is doing a job in the sentence, name the job.`,
-        structureTitle: "2. Structure Hypothesis",
-        structureQuestion:
-          "Identify the base and suffix. Then explain what changed (or did not change) at the join and why.",
-        relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) =>
-          `Build a small word family for ${base} (4+ words). Use it as evidence for your structure.`,
-        graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) =>
-          `Explain the meaning contribution of <-${suffix}> and connect it to your word family evidence.`,
-        checkJoinLabel: "Check the Join",
-      };
-
     case "abstract":
       return {
         meaningTitle: "1. Meaning",
         meaningQuestion: (word) =>
-          `Define ${word} in context and justify your interpretation using sentence evidence.`,
+          `Define ${word} in context.`,
         structureTitle: "2. Structure Hypothesis",
         structureQuestion:
-          "Write the morphological analysis (base + suffix). Then justify the suffixing convention at the join using evidence.",
+          "Identify the base and suffix. Then explain what changed (or did not change) at the join.",
         relatedTitle: "3. Related Words (Evidence)",
         relatedQuestion: (base) =>
-          `Generate a word family for ${base}. Identify which relative word best confirms the base spelling.`,
+          `Build a word family for ${base}.`,
         graphemeTitle: "4. Grapheme Function",
         graphemeQuestion: (suffix) =>
-          `Explain how <-${suffix}> functions (meaning + role). Cite structural evidence from your analysis.`,
-        checkJoinLabel: "Check the Join",
+          `Explain how <-${suffix}> functions and justify your reasoning.`,
       };
   }
 }
@@ -93,6 +70,8 @@ export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
   const [lessonIndex, setLessonIndex] = useState(0);
   const [teacherView, setTeacherView] = useState(false);
+
+  const [joinPromptShown, setJoinPromptShown] = useState(false);
   const [showStructure, setShowStructure] = useState(false);
 
   const [meaningResponse, setMeaningResponse] = useState("");
@@ -107,7 +86,16 @@ export default function App() {
     setStructureResponse("");
     setRelatedResponse("");
     setGraphemeResponse("");
+    setJoinPromptShown(false);
     setShowStructure(false);
+  };
+
+  const handleCheckJoins = () => {
+    if (!joinPromptShown) {
+      setJoinPromptShown(true);
+    } else {
+      setShowStructure(true);
+    }
   };
 
   if (!lesson) return <div style={{ padding: "2rem" }}>No lessons found.</div>;
@@ -162,12 +150,11 @@ export default function App() {
         </button>
       </div>
 
-      {/* 1. Meaning */}
+      {/* Meaning */}
       <section style={{ marginTop: "2rem" }}>
         <h3>{prompts.meaningTitle}</h3>
         <p>{lesson.sentence}</p>
         <p>{prompts.meaningQuestion(lesson.word)}</p>
-
         <textarea
           value={meaningResponse}
           onChange={(e) => setMeaningResponse(e.target.value)}
@@ -176,11 +163,10 @@ export default function App() {
         />
       </section>
 
-      {/* 2. Structure Hypothesis */}
+      {/* Structure */}
       <section style={{ marginTop: "2rem" }}>
         <h3>{prompts.structureTitle}</h3>
         <p>{prompts.structureQuestion}</p>
-
         <textarea
           value={structureResponse}
           onChange={(e) => setStructureResponse(e.target.value)}
@@ -190,11 +176,18 @@ export default function App() {
 
         {!showStructure && (
           <button
-            onClick={() => setShowStructure(true)}
+            onClick={handleCheckJoins}
             style={{ marginTop: "0.5rem" }}
           >
-            {prompts.checkJoinLabel}
+            Check the Joins
           </button>
+        )}
+
+        {joinPromptShown && !showStructure && (
+          <p style={{ marginTop: "0.5rem" }}>
+            Decide whether a suffixing convention is required where the base
+            and suffix join.
+          </p>
         )}
 
         {(showStructure || teacherView) && (
@@ -211,18 +204,16 @@ export default function App() {
         )}
       </section>
 
-      {/* 3. Related Words (Evidence) */}
+      {/* Evidence */}
       <section style={{ marginTop: "2rem" }}>
         <h3>{prompts.relatedTitle}</h3>
         <p>{prompts.relatedQuestion(lesson.base)}</p>
-
         <textarea
           value={relatedResponse}
           onChange={(e) => setRelatedResponse(e.target.value)}
           rows={4}
           style={{ width: "100%" }}
         />
-
         {teacherView && (
           <div style={{ marginTop: "0.5rem" }}>
             <strong>Suggested:</strong> {lesson.related.join(", ")}
@@ -230,18 +221,16 @@ export default function App() {
         )}
       </section>
 
-      {/* 4. Grapheme Function */}
+      {/* Grapheme */}
       <section style={{ marginTop: "2rem" }}>
         <h3>{prompts.graphemeTitle}</h3>
         <p>{prompts.graphemeQuestion(lesson.suffix)}</p>
-
         <textarea
           value={graphemeResponse}
           onChange={(e) => setGraphemeResponse(e.target.value)}
           rows={4}
           style={{ width: "100%" }}
         />
-
         {teacherView && (
           <div
             style={{
