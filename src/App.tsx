@@ -61,7 +61,18 @@ function getPrompts(tier: Tier): Prompts {
       };
   }
 }
-
+    default:
+      return {
+        meaningTitle: "1. Meaning",
+        meaningQuestion: (word) => `What does ${word} mean here?`,
+        structureTitle: "2. Structure Hypothesis",
+        structureQuestion: "What is the base? What was added?",
+        relatedTitle: "3. Related Words (Evidence)",
+        relatedQuestion: (base) => `List words related to ${base}.`,
+        graphemeTitle: "4. Grapheme Function",
+        graphemeQuestion: (suffix) =>
+          `What does ⟨-${suffix}⟩ contribute to meaning?`,
+      };
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
   const [lessonIndex, setLessonIndex] = useState(0);
