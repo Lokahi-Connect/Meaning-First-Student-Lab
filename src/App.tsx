@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { LESSONS } from "./data/lessons";
+import { LESSONS, type JoinConventionType } from "./data/lessons";
 
 type Tier = "emerging" | "developing" | "expanding" | "abstract";
 
@@ -24,47 +24,47 @@ function getPrompts(tier: Tier): Prompts {
         structureQuestion:
           "What do you think is the base? What do you think was added?",
         relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) =>
-          `Write words that belong with ${base}.`,
+        relatedQuestion: (base) => `Write words that belong with ${base}.`,
         graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) =>
-          `What does <-${suffix}> help this word mean?`,
+        graphemeQuestion: (suffix) => `What does <-${suffix}> help this word mean?`,
       };
 
     case "developing":
       return {
         meaningTitle: "1. Meaning",
-        meaningQuestion: (word) =>
-          `What does ${word} mean in this sentence?`,
+        meaningQuestion: (word) => `What does ${word} mean in this sentence?`,
         structureTitle: "2. Structure Hypothesis",
         structureQuestion:
           "What is the base? What suffix might be attached? Write your hypothesis before checking.",
         relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) =>
-          `List words related to ${base}.`,
+        relatedQuestion: (base) => `List words related to ${base}.",
         graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) =>
-          `Explain how <-${suffix}> is functioning.`,
+        graphemeQuestion: (suffix) => `Explain how <-${suffix}> is functioning.`,
       };
 
     case "expanding":
     case "abstract":
       return {
         meaningTitle: "1. Meaning",
-        meaningQuestion: (word) =>
-          `Define ${word} in context.`,
+        meaningQuestion: (word) => `Define ${word} in context.",
         structureTitle: "2. Structure Hypothesis",
         structureQuestion:
           "Identify the base and suffix. Then explain what changed (or did not change) at the join.",
         relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) =>
-          `Build a word family for ${base}.`,
+        relatedQuestion: (base) => `Build a word family for ${base}.",
         graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) =>
-          `Explain how <-${suffix}> functions and justify your reasoning.`,
+        graphemeQuestion: (suffix) => `Explain how <-${suffix}> functions and justify your reasoning.",
       };
   }
 }
+
+const JOIN_EXPLANATIONS: Record<JoinConventionType, string> = {
+  None: "No-change convention: add the vowel suffix directly to the base. The spelling of the base remains stable.",
+  Double: "Double convention: the final consonant doubles before adding the vowel suffix when the base ends in vowel+consonant.",
+  Replace: "Replace convention: final <e> is replaced before adding a vowel suffix.",
+  Change: "Change convention: consonant + <y> becomes <i> before adding certain suffixes like <-ed>.",
+  Toggle: "Toggle convention: adjust as needed at the join.",
+};
 
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
@@ -224,6 +224,10 @@ export default function App() {
             }}
           >
             <strong>Structure:</strong> {lesson.structure}
+            <div style={{ marginTop: "0.5rem" }}>
+              <strong>Join:</strong> {lesson.joinConvention} —
+              <span> {JOIN_EXPLANATIONS[lesson.joinConvention]}</span>
+            </div>
           </div>
         )}
       </section>
