@@ -6,6 +6,7 @@ type Tier = "emerging" | "developing" | "expanding" | "abstract";
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
   const [lessonIndex, setLessonIndex] = useState(0);
+  const [teacherView, setTeacherView] = useState(false);
 
   const [meaningResponse, setMeaningResponse] = useState("");
   const [structureResponse, setStructureResponse] = useState("");
@@ -22,7 +23,7 @@ export default function App() {
   };
 
   if (!lesson) {
-    return <div>No lessons found.</div>;
+    return <div style={{ padding: "2rem" }}>No lessons found.</div>;
   }
 
   if (!tier) {
@@ -59,7 +60,20 @@ export default function App() {
 
       <h2 style={{ marginTop: "1rem" }}>Tier: {tier}</h2>
 
-      <button onClick={() => setTier(null)}>← Change Tier</button>
+      <div style={{ marginTop: "0.75rem" }}>
+        <button onClick={() => setTier(null)}>← Change Tier</button>
+
+        <button
+          onClick={() => setTeacherView((v) => !v)}
+          style={{ marginLeft: "0.75rem" }}
+        >
+          {teacherView ? "Student View" : "Teacher View"}
+        </button>
+
+        <button onClick={resetResponses} style={{ marginLeft: "0.75rem" }}>
+          Reset responses
+        </button>
+      </div>
 
       {/* 1. Meaning */}
       <section style={{ marginTop: "2rem" }}>
@@ -103,6 +117,12 @@ export default function App() {
           rows={4}
           style={{ width: "100%" }}
         />
+        {teacherView && (
+          <div style={{ marginTop: "0.5rem" }}>
+            <strong>Teacher note:</strong> Suggested related words:{" "}
+            {lesson.related.join(", ")}
+          </div>
+        )}
       </section>
 
       {/* 4. Grapheme Function */}
@@ -118,6 +138,20 @@ export default function App() {
           rows={4}
           style={{ width: "100%" }}
         />
+
+        {teacherView && (
+          <div
+            style={{
+              marginTop: "1rem",
+              padding: "1rem",
+              backgroundColor: "#f4f4f4",
+              borderRadius: "6px",
+            }}
+          >
+            <strong>Model Explanation:</strong>
+            <p style={{ marginTop: "0.5rem" }}>{lesson.graphemeExplanation}</p>
+          </div>
+        )}
       </section>
     </div>
   );
