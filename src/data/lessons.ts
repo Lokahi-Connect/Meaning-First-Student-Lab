@@ -8,7 +8,6 @@ export interface Lesson {
   suffix: string;
   structure: string;
   related: string[];
-  graphemeExplanation: string;
   joinConvention: JoinConventionType;
 }
 
