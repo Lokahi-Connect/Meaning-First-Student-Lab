@@ -14,6 +14,13 @@ export default function App() {
 
   const lesson = LESSONS[lessonIndex];
 
+  const resetResponses = () => {
+    setMeaningResponse("");
+    setStructureResponse("");
+    setRelatedResponse("");
+    setGraphemeResponse("");
+  };
+
   if (!lesson) {
     return <div>No lessons found.</div>;
   }
@@ -40,10 +47,7 @@ export default function App() {
         value={lessonIndex}
         onChange={(e) => {
           setLessonIndex(Number(e.target.value));
-          setMeaningResponse("");
-          setStructureResponse("");
-          setRelatedResponse("");
-          setGraphemeResponse("");
+          resetResponses();
         }}
       >
         {LESSONS.map((l, i) => (
@@ -56,6 +60,9 @@ export default function App() {
       <h2 style={{ marginTop: "1rem" }}>Tier: {tier}</h2>
 
       <button onClick={() => setTier(null)}>← Change Tier</button>
+      <button onClick={resetResponses} style={{ marginLeft: "0.75rem" }}>
+        Reset responses
+      </button>
 
       {/* 1. Meaning */}
       <section style={{ marginTop: "2rem" }}>
@@ -89,7 +96,9 @@ export default function App() {
       {/* 3. Related Words */}
       <section style={{ marginTop: "2rem" }}>
         <h3>3. Related Words</h3>
-        <p>What other words are related to <strong>{lesson.base}</strong>?</p>
+        <p>
+          What other words are related to <strong>{lesson.base}</strong>?
+        </p>
         <textarea
           value={relatedResponse}
           onChange={(e) => setRelatedResponse(e.target.value)}
