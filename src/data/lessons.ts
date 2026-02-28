@@ -33,7 +33,7 @@ export const LESSONS: Lesson[] = [
     structure: "run + ing → running",
     related: ["run", "runs", "runner"],
     graphemeExplanation:
-      "Before adding the vowel suffix <-ing>, the final consonant of the base <run> doubles. The doubling preserves the intended vowel pattern of the base."
+      "Before adding the vowel suffix <-ing>, the final consonant of the base <run> doubles. This is a predictable structural pattern when adding certain vowel suffixes."
   },
 
   // 3) REPLACE FINAL NON-SYLLABIC <e>
