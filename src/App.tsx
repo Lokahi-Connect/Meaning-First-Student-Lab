@@ -5,16 +5,17 @@ type Tier = "emerging" | "developing" | "expanding" | "abstract";
 
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
+  const [lessonIndex, setLessonIndex] = useState(0);
 
-  const lesson = LESSONS[0];
+  const [meaningResponse, setMeaningResponse] = useState("");
+  const [structureResponse, setStructureResponse] = useState("");
+  const [relatedResponse, setRelatedResponse] = useState("");
+  const [graphemeResponse, setGraphemeResponse] = useState("");
+
+  const lesson = LESSONS[lessonIndex];
 
   if (!lesson) {
-    return (
-      <div style={{ padding: "2rem" }}>
-        <h1>Meaning-First Student Lab</h1>
-        <p>No lesson found. Add at least one lesson in <code>src/data/lessons.ts</code>.</p>
-      </div>
-    );
+    return <div>No lessons found.</div>;
   }
 
   if (!tier) {
@@ -22,7 +23,6 @@ export default function App() {
       <div style={{ padding: "2rem" }}>
         <h1>Meaning-First Student Lab</h1>
         <h2>Select Your Tier</h2>
-
         <button onClick={() => setTier("emerging")}>🌱 Emerging</button>
         <button onClick={() => setTier("developing")}>🌿 Developing</button>
         <button onClick={() => setTier("expanding")}>🌳 Expanding</button>
@@ -34,62 +34,84 @@ export default function App() {
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Meaning-First Student Lab</h1>
-      <h2>Tier: {tier}</h2>
 
-      <button onClick={() => setTier(null)} style={{ marginBottom: "2rem" }}>
-        ← Change Tier
-      </button>
+      {/* Lesson Selector */}
+      <select
+        value={lessonIndex}
+        onChange={(e) => {
+          setLessonIndex(Number(e.target.value));
+          setMeaningResponse("");
+          setStructureResponse("");
+          setRelatedResponse("");
+          setGraphemeResponse("");
+        }}
+      >
+        {LESSONS.map((l, i) => (
+          <option key={l.id} value={i}>
+            {l.word}
+          </option>
+        ))}
+      </select>
 
-      {/* 1. Meaning (in sentence context) */}
-      <section>
+      <h2 style={{ marginTop: "1rem" }}>Tier: {tier}</h2>
+
+      <button onClick={() => setTier(null)}>← Change Tier</button>
+
+      {/* 1. Meaning */}
+      <section style={{ marginTop: "2rem" }}>
         <h3>1. Meaning</h3>
         <p>{lesson.sentence}</p>
         <p>
-          What does the word <strong>{lesson.word}</strong> mean in this sentence?
+          What does <strong>{lesson.word}</strong> mean in this sentence?
         </p>
+        <textarea
+          value={meaningResponse}
+          onChange={(e) => setMeaningResponse(e.target.value)}
+          placeholder="Write your thinking..."
+          rows={4}
+          style={{ width: "100%" }}
+        />
       </section>
 
-      {/* 2. Structure (morphemes) */}
+      {/* 2. Structure */}
       <section style={{ marginTop: "2rem" }}>
         <h3>2. Structure</h3>
-
-        {tier === "emerging" && <p>{lesson.structure}</p>}
-
-        {tier === "developing" && (
-          <p>What base do you notice? What suffix might be attached?</p>
-        )}
-
-        {(tier === "expanding" || tier === "abstract") && (
-          <p>
-            Identify the base and the suffix, then explain why the spelling remains stable.
-          </p>
-        )}
+        <p>{lesson.structure}</p>
+        <textarea
+          value={structureResponse}
+          onChange={(e) => setStructureResponse(e.target.value)}
+          placeholder="Identify base and suffix..."
+          rows={4}
+          style={{ width: "100%" }}
+        />
       </section>
 
-      {/* 3. Related Words (word family) */}
+      {/* 3. Related Words */}
       <section style={{ marginTop: "2rem" }}>
         <h3>3. Related Words</h3>
-
-        {tier === "emerging" && <p>{lesson.related.join(", ")}</p>}
-
-        {tier !== "emerging" && (
-          <p>
-            What other words are related to <strong>{lesson.base}</strong>?
-          </p>
-        )}
+        <p>What other words are related to <strong>{lesson.base}</strong>?</p>
+        <textarea
+          value={relatedResponse}
+          onChange={(e) => setRelatedResponse(e.target.value)}
+          placeholder="List related words..."
+          rows={4}
+          style={{ width: "100%" }}
+        />
       </section>
 
       {/* 4. Grapheme Function */}
       <section style={{ marginTop: "2rem" }}>
         <h3>4. Grapheme Function</h3>
-
-        {tier === "emerging" && <p>{lesson.graphemeExplanation}</p>}
-
-        {tier !== "emerging" && (
-          <p>
-            How is the grapheme &lt;-{lesson.suffix}&gt; functioning in this word?
-          </p>
-        )}
+        <p>
+          How is the grapheme &lt;-{lesson.suffix}&gt; functioning in this word?
+        </p>
+        <textarea
+          value={graphemeResponse}
+          onChange={(e) => setGraphemeResponse(e.target.value)}
+          placeholder="Explain how the suffix functions..."
+          rows={4}
+          style={{ width: "100%" }}
+        />
       </section>
     </div>
   );
