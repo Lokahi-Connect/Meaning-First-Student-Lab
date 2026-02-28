@@ -1,3 +1,5 @@
+export type JoinConventionType = "None" | "Double" | "Replace" | "Change" | "Toggle";
+
 export interface Lesson {
   id: string;
   word: string;
@@ -7,10 +9,10 @@ export interface Lesson {
   structure: string;
   related: string[];
   graphemeExplanation: string;
+  joinConvention: JoinConventionType;
 }
 
 export const LESSONS: Lesson[] = [
-  // 1) NO CHANGE (vowel suffix joins with no spelling change)
   {
     id: "suffixing_no_change_intro",
     word: "jumping",
@@ -20,10 +22,9 @@ export const LESSONS: Lesson[] = [
     structure: "jump + ing → jumping",
     related: ["jump", "jumps", "jumped"],
     graphemeExplanation:
-      "No-change convention: add the vowel suffix <-ing> directly to the base <jump>. The spelling of the base remains stable."
+      "No-change convention: add the vowel suffix <-ing> directly to the base <jump>. The spelling of the base remains stable.",
+    joinConvention: "None",
   },
-
-  // 2) DOUBLING
   {
     id: "suffixing_doubling_intro",
     word: "running",
@@ -33,10 +34,9 @@ export const LESSONS: Lesson[] = [
     structure: "run + ing → running",
     related: ["run", "runs", "runner"],
     graphemeExplanation:
-      "Doubling convention: the final consonant doubles before adding the vowel suffix <-ing>. This is a predictable structural pattern in English orthography (run → running)."
+      "Double convention: the final consonant doubles before adding the vowel suffix <-ing> when the base ends in vowel+consonant.",
+    joinConvention: "Double",
   },
-
-  // 3) REPLACE FINAL NON-SYLLABIC <e> (commonly taught as “final-e drop”)
   {
     id: "suffixing_final_e_intro",
     word: "making",
@@ -46,10 +46,9 @@ export const LESSONS: Lesson[] = [
     structure: "make + ing → making",
     related: ["make", "maker", "made"],
     graphemeExplanation:
-      "Final non-syllabic <e> convention: when adding a vowel suffix like <-ing>, the final non-syllabic <e> is removed before the suffix is added (make → making)."
+      "Replace convention: final <e> is replaced before adding a vowel suffix like <-ing>.",
+    joinConvention: "Replace",
   },
-
-  // 4) CHANGE FINAL <y> TO <i> (triggered by certain suffixes like <-ed>, <-es>, <-er>, <-est>)
   {
     id: "suffixing_y_to_i_intro",
     word: "tried",
@@ -59,6 +58,7 @@ export const LESSONS: Lesson[] = [
     structure: "try + ed → tried",
     related: ["try", "tries", "trying"],
     graphemeExplanation:
-      "Final <y> to <i> convention: when a base ends in consonant + <y>, the <y> changes to <i> before adding certain suffixes such as <-ed> or <-es> (try → tried, tries)."
-  }
+      "Change convention: consonant + <y> becomes <i> before adding certain suffixes like <-ed>.",
+    joinConvention: "Change",
+  },
 ];
