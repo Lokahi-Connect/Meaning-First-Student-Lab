@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { LESSONS, type JoinConventionType } from "./data/lessons";
+import { LESSONS } from "./data/lessons";
+import { JOIN_CONVENTIONS } from "./data/joinConventions";
 
 type Tier = "emerging" | "developing" | "expanding" | "abstract";
 
@@ -26,7 +27,8 @@ function getPrompts(tier: Tier): Prompts {
         relatedTitle: "3. Related Words (Evidence)",
         relatedQuestion: (base) => `Write words that belong with ${base}.`,
         graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) => `What does <-${suffix}> help this word mean?`,
+        graphemeQuestion: (suffix) =>
+          `What does ⟨-${suffix}⟩ help this word mean?`,
       };
 
     case "developing":
@@ -37,34 +39,28 @@ function getPrompts(tier: Tier): Prompts {
         structureQuestion:
           "What is the base? What suffix might be attached? Write your hypothesis before checking.",
         relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) => `List words related to ${base}.",
+        relatedQuestion: (base) => `List words related to ${base}.`,
         graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) => `Explain how <-${suffix}> is functioning.`,
+        graphemeQuestion: (suffix) =>
+          `Explain how ⟨-${suffix}⟩ is functioning.`,
       };
 
     case "expanding":
     case "abstract":
       return {
         meaningTitle: "1. Meaning",
-        meaningQuestion: (word) => `Define ${word} in context.",
+        meaningQuestion: (word) => `Define ${word} in context.`,
         structureTitle: "2. Structure Hypothesis",
         structureQuestion:
           "Identify the base and suffix. Then explain what changed (or did not change) at the join.",
         relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) => `Build a word family for ${base}.",
+        relatedQuestion: (base) => `Build a word family for ${base}.`,
         graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) => `Explain how <-${suffix}> functions and justify your reasoning.",
+        graphemeQuestion: (suffix) =>
+          `Explain how ⟨-${suffix}⟩ functions and justify your reasoning.`,
       };
   }
 }
-
-const JOIN_EXPLANATIONS: Record<JoinConventionType, string> = {
-  None: "No-change convention: add the vowel suffix directly to the base. The spelling of the base remains stable.",
-  Double: "Double convention: the final consonant doubles before adding the vowel suffix when the base ends in vowel+consonant.",
-  Replace: "Replace convention: final <e> is replaced before adding a vowel suffix.",
-  Change: "Change convention: consonant + <y> becomes <i> before adding certain suffixes like <-ed>.",
-  Toggle: "Toggle convention: adjust as needed at the join.",
-};
 
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
@@ -114,6 +110,8 @@ export default function App() {
   }
 
   const prompts = useMemo(() => getPrompts(tier), [tier]);
+
+  const joinInfo = JOIN_CONVENTIONS[lesson.joinConvention];
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -175,10 +173,7 @@ export default function App() {
         />
 
         {!showStructure && (
-          <button
-            onClick={handleCheckJoins}
-            style={{ marginTop: "0.5rem" }}
-          >
+          <button onClick={handleCheckJoins} style={{ marginTop: "0.5rem" }}>
             {joinPromptShown ? "Confirm Structure" : "Check the Joins"}
           </button>
         )}
@@ -191,12 +186,12 @@ export default function App() {
                 <>
                   <li>Look at the end of the base.</li>
                   <li>Does anything need to change?</li>
-                  <li>No change, double, remove &lt;e&gt;, or y→i?</li>
+                  <li>No change, double, replace ⟨e⟩, or y→i?</li>
                 </>
               ) : tier === "developing" ? (
                 <>
-                  <li>Does the base end in non-syllabic &lt;e&gt;?</li>
-                  <li>Does it end in consonant + &lt;y&gt;?</li>
+                  <li>Does the base end in non-syllabic ⟨e⟩?</li>
+                  <li>Does it end in consonant + ⟨y⟩?</li>
                   <li>Does it end in 1 vowel + 1 consonant?</li>
                   <li>If none apply, it may be no change.</li>
                 </>
@@ -204,9 +199,9 @@ export default function App() {
                 <>
                   <li>State the base and suffix explicitly.</li>
                   <li>Diagnose the join condition:</li>
-                  <li>non-syllabic &lt;e&gt; → remove</li>
-                  <li>consonant + &lt;y&gt; → y→i</li>
-                  <li>1 vowel + 1 consonant → doubling</li>
+                  <li>non-syllabic ⟨e⟩ → replace ⟨e⟩</li>
+                  <li>consonant + ⟨y⟩ → y→i (for certain suffixes)</li>
+                  <li>1 vowel + 1 consonant → doubling (common in 1-syllable bases)</li>
                   <li>otherwise → no change</li>
                 </>
               )}
@@ -225,8 +220,8 @@ export default function App() {
           >
             <strong>Structure:</strong> {lesson.structure}
             <div style={{ marginTop: "0.5rem" }}>
-              <strong>Join:</strong> {lesson.joinConvention} —
-              <span> {JOIN_EXPLANATIONS[lesson.joinConvention]}</span>
+              <strong>Join:</strong> {joinInfo.label} ({joinInfo.type}) —{" "}
+              <span>{joinInfo.explanation}</span>
             </div>
           </div>
         )}
@@ -259,6 +254,7 @@ export default function App() {
           rows={4}
           style={{ width: "100%" }}
         />
+
         {teacherView && (
           <div
             style={{
@@ -268,8 +264,12 @@ export default function App() {
               borderRadius: "6px",
             }}
           >
-            <strong>Model Explanation:</strong>
-            <p>{lesson.graphemeExplanation}</p>
+            <strong>Teacher note:</strong>
+            <p style={{ marginTop: "0.5rem" }}>
+              Model grapheme-function explanations can be added next as a separate
+              map (by suffix) or a tiered “model response” library. For now,
+              use the student’s response and press for meaning + evidence.
+            </p>
           </div>
         )}
       </section>
