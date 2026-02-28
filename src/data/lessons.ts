@@ -20,8 +20,6 @@ export const LESSONS: Lesson[] = [
     suffix: "ing",
     structure: "jump + ing → jumping",
     related: ["jump", "jumps", "jumped"],
-    graphemeExplanation:
-      "No-change convention: add the vowel suffix ⟨-ing⟩ directly to the base ⟨jump⟩. The spelling of the base remains stable.",
     joinConvention: "None",
   },
   {
@@ -32,8 +30,6 @@ export const LESSONS: Lesson[] = [
     suffix: "ing",
     structure: "run + ing → running",
     related: ["run", "runs", "runner"],
-    graphemeExplanation:
-      "Doubling convention: when a one-syllable base ends in a single vowel followed by a single consonant (VC), the final consonant doubles before adding a vowel suffix such as ⟨-ing⟩.",
     joinConvention: "Double",
   },
   {
@@ -44,8 +40,6 @@ export const LESSONS: Lesson[] = [
     suffix: "ing",
     structure: "make + ing → making",
     related: ["make", "maker", "made"],
-    graphemeExplanation:
-      "Replace convention: final ⟨e⟩ is replaced before adding a vowel suffix like ⟨-ing⟩.",
     joinConvention: "Replace",
   },
   {
@@ -56,8 +50,6 @@ export const LESSONS: Lesson[] = [
     suffix: "ed",
     structure: "try + ed → tried",
     related: ["try", "tries", "trying"],
-    graphemeExplanation:
-      "Change convention: when a base ends in consonant + ⟨y⟩, the ⟨y⟩ changes to ⟨i⟩ before adding certain suffixes such as ⟨-ed⟩ (but not before ⟨-ing⟩).",
     joinConvention: "Change",
   },
 ];
