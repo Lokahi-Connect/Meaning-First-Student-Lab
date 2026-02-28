@@ -34,7 +34,7 @@ export const LESSONS: Lesson[] = [
     structure: "run + ing → running",
     related: ["run", "runs", "runner"],
     graphemeExplanation:
-      "Doubling convention: when a one-syllable base ends in a single vowel + single consonant (VC), the final consonant doubles before adding a vowel suffix like ⟨-ing⟩.",
+      "Doubling convention: when a one-syllable base ends in a single vowel followed by a single consonant (VC), the final consonant doubles before adding a vowel suffix such as ⟨-ing⟩.",
     joinConvention: "Double",
   },
   {
@@ -58,7 +58,7 @@ export const LESSONS: Lesson[] = [
     structure: "try + ed → tried",
     related: ["try", "tries", "trying"],
     graphemeExplanation:
-      "Change convention: when a base ends in consonant + ⟨y⟩, the ⟨y⟩ changes to ⟨i⟩ before adding suffixes like ⟨-ed⟩ (but not before ⟨-ing⟩).",
+      "Change convention: when a base ends in consonant + ⟨y⟩, the ⟨y⟩ changes to ⟨i⟩ before adding certain suffixes such as ⟨-ed⟩ (but not before ⟨-ing⟩).",
     joinConvention: "Change",
   },
 ];
