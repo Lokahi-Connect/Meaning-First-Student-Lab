@@ -10,7 +10,7 @@ export interface Lesson {
 }
 
 export const LESSONS: Lesson[] = [
-  // 1) NO CHANGE
+  // 1) NO CHANGE (vowel suffix joins with no spelling change)
   {
     id: "suffixing_no_change_intro",
     word: "jumping",
@@ -20,7 +20,7 @@ export const LESSONS: Lesson[] = [
     structure: "jump + ing → jumping",
     related: ["jump", "jumps", "jumped"],
     graphemeExplanation:
-      "When adding the vowel suffix <-ing>, the base <jump> remains orthographically stable. No structural change is required."
+      "No-change convention: add the vowel suffix <-ing> directly to the base <jump>. The spelling of the base remains stable."
   },
 
   // 2) DOUBLING
@@ -33,10 +33,10 @@ export const LESSONS: Lesson[] = [
     structure: "run + ing → running",
     related: ["run", "runs", "runner"],
     graphemeExplanation:
-      "Before adding the vowel suffix <-ing>, the final consonant of the base <run> doubles. This is a predictable structural pattern when adding certain vowel suffixes."
+      "Doubling convention: the final consonant doubles before adding the vowel suffix <-ing>. This is a predictable structural pattern in English orthography (run → running)."
   },
 
-  // 3) REPLACE FINAL NON-SYLLABIC <e>
+  // 3) REPLACE FINAL NON-SYLLABIC <e> (commonly taught as “final-e drop”)
   {
     id: "suffixing_final_e_intro",
     word: "making",
@@ -46,10 +46,10 @@ export const LESSONS: Lesson[] = [
     structure: "make + ing → making",
     related: ["make", "maker", "made"],
     graphemeExplanation:
-      "When a base ends in non-syllabic <e>, the <e> is removed before adding a vowel suffix like <-ing>. The base meaning remains stable."
+      "Final non-syllabic <e> convention: when adding a vowel suffix like <-ing>, the final non-syllabic <e> is removed before the suffix is added (make → making)."
   },
 
-  // 4) CHANGE FINAL <y> TO <i>
+  // 4) CHANGE FINAL <y> TO <i> (triggered by certain suffixes like <-ed>, <-es>, <-er>, <-est>)
   {
     id: "suffixing_y_to_i_intro",
     word: "tried",
@@ -59,6 +59,6 @@ export const LESSONS: Lesson[] = [
     structure: "try + ed → tried",
     related: ["try", "tries", "trying"],
     graphemeExplanation:
-      "When a base ends in consonant + <y>, the <y> changes to <i> before adding certain suffixes such as <-ed> or <-es>. The base meaning remains consistent across the word family."
+      "Final <y> to <i> convention: when a base ends in consonant + <y>, the <y> changes to <i> before adding certain suffixes such as <-ed> or <-es> (try → tried, tries)."
   }
 ];
