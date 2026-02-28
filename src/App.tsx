@@ -47,18 +47,16 @@ function getPrompts(tier: Tier): Prompts {
 
     case "expanding":
     case "abstract":
-      return {
-        meaningTitle: "1. Meaning",
-        meaningQuestion: (word) => `Define ${word} in context.`,
-        structureTitle: "2. Structure Hypothesis",
-        structureQuestion:
-          "Identify the base and suffix. Then explain what changed (or did not change) at the join.",
-        relatedTitle: "3. Related Words (Evidence)",
-        relatedQuestion: (base) => `Build a word family for ${base}.`,
-        graphemeTitle: "4. Grapheme Function",
-        graphemeQuestion: (suffix) =>
-          `Explain how ⟨-${suffix}⟩ functions and justify your reasoning.`,
-      };
+   return {
+  meaningTitle: "1. Meaning",
+  meaningQuestion: (word) => `What does ${word} mean here?`,
+  structureTitle: "2. Structure Hypothesis",
+  structureQuestion: "What is the base? What was added?",
+  relatedTitle: "3. Related Words (Evidence)",
+  relatedQuestion: (base) => `List words related to ${base}.`,
+  graphemeTitle: "4. Grapheme Function",
+  graphemeQuestion: (suffix) => `What does ⟨-${suffix}⟩ contribute to meaning?`,
+};
   }
 }
 
