@@ -7,6 +7,7 @@ export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
   const [lessonIndex, setLessonIndex] = useState(0);
   const [teacherView, setTeacherView] = useState(false);
+  const [showStructure, setShowStructure] = useState(false);
 
   const [meaningResponse, setMeaningResponse] = useState("");
   const [structureResponse, setStructureResponse] = useState("");
@@ -20,11 +21,10 @@ export default function App() {
     setStructureResponse("");
     setRelatedResponse("");
     setGraphemeResponse("");
+    setShowStructure(false);
   };
 
-  if (!lesson) {
-    return <div style={{ padding: "2rem" }}>No lessons found.</div>;
-  }
+  if (!lesson) return <div style={{ padding: "2rem" }}>No lessons found.</div>;
 
   if (!tier) {
     return (
@@ -43,7 +43,6 @@ export default function App() {
     <div style={{ padding: "2rem" }}>
       <h1>Meaning-First Student Lab</h1>
 
-      {/* Lesson Selector */}
       <select
         value={lessonIndex}
         onChange={(e) => {
@@ -71,7 +70,7 @@ export default function App() {
         </button>
 
         <button onClick={resetResponses} style={{ marginLeft: "0.75rem" }}>
-          Reset responses
+          Reset
         </button>
       </div>
 
@@ -80,61 +79,83 @@ export default function App() {
         <h3>1. Meaning</h3>
         <p>{lesson.sentence}</p>
         <p>
-          What does <strong>{lesson.word}</strong> mean in this sentence?
+          What does <strong>{lesson.word}</strong> mean?
         </p>
+
         <textarea
           value={meaningResponse}
           onChange={(e) => setMeaningResponse(e.target.value)}
-          placeholder="Write your thinking..."
           rows={4}
           style={{ width: "100%" }}
         />
       </section>
 
-      {/* 2. Structure */}
+      {/* 2. Hypothesis About Structure */}
       <section style={{ marginTop: "2rem" }}>
-        <h3>2. Structure</h3>
-        <p>{lesson.structure}</p>
+        <h3>2. Structure Hypothesis</h3>
+        <p>What base do you notice? What suffix might be attached?</p>
+
         <textarea
           value={structureResponse}
           onChange={(e) => setStructureResponse(e.target.value)}
-          placeholder="Identify base and suffix..."
           rows={4}
           style={{ width: "100%" }}
         />
-      </section>
 
-      {/* 3. Related Words */}
-      <section style={{ marginTop: "2rem" }}>
-        <h3>3. Related Words</h3>
-        <p>
-          What other words are related to <strong>{lesson.base}</strong>?
-        </p>
-        <textarea
-          value={relatedResponse}
-          onChange={(e) => setRelatedResponse(e.target.value)}
-          placeholder="List related words..."
-          rows={4}
-          style={{ width: "100%" }}
-        />
-        {teacherView && (
-          <div style={{ marginTop: "0.5rem" }}>
-            <strong>Teacher note:</strong> Suggested related words:{" "}
-            {lesson.related.join(", ")}
+        {!showStructure && (
+          <button
+            onClick={() => setShowStructure(true)}
+            style={{ marginTop: "0.5rem" }}
+          >
+            Check the Join
+          </button>
+        )}
+
+        {(showStructure || teacherView) && (
+          <div
+            style={{
+              marginTop: "0.75rem",
+              padding: "0.75rem",
+              backgroundColor: "#f4f4f4",
+              borderRadius: "6px",
+            }}
+          >
+            <strong>Structure:</strong> {lesson.structure}
           </div>
         )}
       </section>
 
-      {/* 4. Grapheme Function */}
+      {/* 3. Evidence */}
+      <section style={{ marginTop: "2rem" }}>
+        <h3>3. Related Words (Evidence)</h3>
+        <p>
+          What other words are related to <strong>{lesson.base}</strong>?
+        </p>
+
+        <textarea
+          value={relatedResponse}
+          onChange={(e) => setRelatedResponse(e.target.value)}
+          rows={4}
+          style={{ width: "100%" }}
+        />
+
+        {teacherView && (
+          <div style={{ marginTop: "0.5rem" }}>
+            <strong>Suggested:</strong> {lesson.related.join(", ")}
+          </div>
+        )}
+      </section>
+
+      {/* 4. Explanation */}
       <section style={{ marginTop: "2rem" }}>
         <h3>4. Grapheme Function</h3>
         <p>
           How is the grapheme &lt;-{lesson.suffix}&gt; functioning in this word?
         </p>
+
         <textarea
           value={graphemeResponse}
           onChange={(e) => setGraphemeResponse(e.target.value)}
-          placeholder="Explain how the suffix functions..."
           rows={4}
           style={{ width: "100%" }}
         />
@@ -144,12 +165,12 @@ export default function App() {
             style={{
               marginTop: "1rem",
               padding: "1rem",
-              backgroundColor: "#f4f4f4",
+              backgroundColor: "#eaeaea",
               borderRadius: "6px",
             }}
           >
             <strong>Model Explanation:</strong>
-            <p style={{ marginTop: "0.5rem" }}>{lesson.graphemeExplanation}</p>
+            <p>{lesson.graphemeExplanation}</p>
           </div>
         )}
       </section>
