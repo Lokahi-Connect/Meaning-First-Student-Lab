@@ -6,7 +6,6 @@ type Tier = "emerging" | "developing" | "expanding" | "abstract";
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
   const [lessonIndex, setLessonIndex] = useState(0);
-  const [teacherView, setTeacherView] = useState(false);
 
   const [meaningResponse, setMeaningResponse] = useState("");
   const [structureResponse, setStructureResponse] = useState("");
@@ -22,7 +21,9 @@ export default function App() {
     setGraphemeResponse("");
   };
 
-  if (!lesson) return <div>No lessons found.</div>;
+  if (!lesson) {
+    return <div>No lessons found.</div>;
+  }
 
   if (!tier) {
     return (
@@ -41,6 +42,7 @@ export default function App() {
     <div style={{ padding: "2rem" }}>
       <h1>Meaning-First Student Lab</h1>
 
+      {/* Lesson Selector */}
       <select
         value={lessonIndex}
         onChange={(e) => {
@@ -58,12 +60,6 @@ export default function App() {
       <h2 style={{ marginTop: "1rem" }}>Tier: {tier}</h2>
 
       <button onClick={() => setTier(null)}>← Change Tier</button>
-      <button
-        onClick={() => setTeacherView(!teacherView)}
-        style={{ marginLeft: "0.75rem" }}
-      >
-        {teacherView ? "Student View" : "Teacher View"}
-      </button>
 
       {/* 1. Meaning */}
       <section style={{ marginTop: "2rem" }}>
@@ -75,6 +71,7 @@ export default function App() {
         <textarea
           value={meaningResponse}
           onChange={(e) => setMeaningResponse(e.target.value)}
+          placeholder="Write your thinking..."
           rows={4}
           style={{ width: "100%" }}
         />
@@ -87,6 +84,7 @@ export default function App() {
         <textarea
           value={structureResponse}
           onChange={(e) => setStructureResponse(e.target.value)}
+          placeholder="Identify base and suffix..."
           rows={4}
           style={{ width: "100%" }}
         />
@@ -101,6 +99,7 @@ export default function App() {
         <textarea
           value={relatedResponse}
           onChange={(e) => setRelatedResponse(e.target.value)}
+          placeholder="List related words..."
           rows={4}
           style={{ width: "100%" }}
         />
@@ -115,23 +114,10 @@ export default function App() {
         <textarea
           value={graphemeResponse}
           onChange={(e) => setGraphemeResponse(e.target.value)}
+          placeholder="Explain how the suffix functions..."
           rows={4}
           style={{ width: "100%" }}
         />
-
-        {teacherView && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              backgroundColor: "#f4f4f4",
-              borderRadius: "6px"
-            }}
-          >
-            <strong>Model Explanation:</strong>
-            <p>{lesson.graphemeExplanation}</p>
-          </div>
-        )}
       </section>
     </div>
   );
