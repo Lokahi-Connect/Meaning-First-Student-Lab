@@ -179,15 +179,39 @@ export default function App() {
             onClick={handleCheckJoins}
             style={{ marginTop: "0.5rem" }}
           >
-            Check the Joins
+            {joinPromptShown ? "Confirm Structure" : "Check the Joins"}
           </button>
         )}
 
         {joinPromptShown && !showStructure && (
-          <p style={{ marginTop: "0.5rem" }}>
-            Decide whether a suffixing convention is required where the base
-            and suffix join.
-          </p>
+          <div style={{ marginTop: "0.75rem" }}>
+            <strong>Check the Joins</strong>
+            <ul style={{ marginTop: "0.5rem" }}>
+              {tier === "emerging" ? (
+                <>
+                  <li>Look at the end of the base.</li>
+                  <li>Does anything need to change?</li>
+                  <li>No change, double, remove &lt;e&gt;, or y→i?</li>
+                </>
+              ) : tier === "developing" ? (
+                <>
+                  <li>Does the base end in non-syllabic &lt;e&gt;?</li>
+                  <li>Does it end in consonant + &lt;y&gt;?</li>
+                  <li>Does it end in 1 vowel + 1 consonant?</li>
+                  <li>If none apply, it may be no change.</li>
+                </>
+              ) : (
+                <>
+                  <li>State the base and suffix explicitly.</li>
+                  <li>Diagnose the join condition:</li>
+                  <li>non-syllabic &lt;e&gt; → remove</li>
+                  <li>consonant + &lt;y&gt; → y→i</li>
+                  <li>1 vowel + 1 consonant → doubling</li>
+                  <li>otherwise → no change</li>
+                </>
+              )}
+            </ul>
+          </div>
         )}
 
         {(showStructure || teacherView) && (
