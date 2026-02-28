@@ -59,8 +59,7 @@ function getPrompts(tier: Tier): Prompts {
         graphemeQuestion: (suffix) =>
           `Explain how ⟨-${suffix}⟩ functions and justify your reasoning.`,
       };
-  }
-}
+
     default:
       return {
         meaningTitle: "1. Meaning",
@@ -73,6 +72,9 @@ function getPrompts(tier: Tier): Prompts {
         graphemeQuestion: (suffix) =>
           `What does ⟨-${suffix}⟩ contribute to meaning?`,
       };
+  }
+}
+
 export default function App() {
   const [tier, setTier] = useState<Tier | null>(null);
   const [lessonIndex, setLessonIndex] = useState(0);
@@ -121,7 +123,6 @@ export default function App() {
   }
 
   const prompts = useMemo(() => getPrompts(tier), [tier]);
-
   const joinInfo = JOIN_CONVENTIONS[lesson.joinConvention];
 
   return (
