@@ -1,0 +1,46 @@
+{
+  "id": "t2_make_ing_join",
+  "task_type": "join_convention_check",
+  "tier": 2,
+  "difficulty": 4,
+  "time_estimate_sec": 210,
+  "targets": {
+    "base": "make",
+    "suffixes": ["ing"],
+    "words": ["making"],
+    "join_conventions": ["final_e_drop_before_vowel_suffix"]
+  },
+  "prompts": {
+    "stem": "Build the word using meaning and structure first, then check the join.",
+    "questions": [
+      { "id": "q1", "text": "What meaning does <-ing> add here?", "intent": "meaning" },
+      { "id": "q2", "text": "Show the structure.", "intent": "structure" },
+      { "id": "q3", "text": "Check the join: what happens to the final <e> when adding <-ing>?", "intent": "join_convention" }
+    ],
+    "supports": [
+      { "type": "sentence_frame", "content": "<make> + <-ing> → <making> because ________." },
+      { "type": "hint", "content": "Use evidence from structure and related words if needed." }
+    ]
+  },
+  "response": {
+    "mode": "short_text",
+    "fields": [
+      { "id": "meaning", "label": "Meaning of <-ing>", "field_type": "text" },
+      { "id": "structure", "label": "Structure", "field_type": "text" },
+      { "id": "join", "label": "Join explanation", "field_type": "text" }
+    ]
+  },
+  "scoring": {
+    "rubric": [
+      { "criterion": "Meaning statement reflects ongoing/process sense", "max_points": 2 },
+      { "criterion": "Structure correctly shows base + suffix", "max_points": 2 },
+      { "criterion": "Join explanation notes final <e> is removed before <-ing>", "max_points": 3 }
+    ],
+    "error_tags": ["meaning_error", "structure_error", "join_error"],
+    "mastery_threshold": 0.75
+  },
+  "metadata": {
+    "tags": ["ing", "final_e", "join_convention", "tier2"],
+    "notes_for_teacher": "If learner writes <makeing>, mediate: base identification + join reasoning."
+  }
+}
