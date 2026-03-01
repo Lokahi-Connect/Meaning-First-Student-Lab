@@ -4,9 +4,21 @@
   "title": "Meaning-First Student Lab Task",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "task_type", "tier", "targets", "prompts", "response", "scoring"],
+  "required": [
+    "id",
+    "task_type",
+    "tier",
+    "context",
+    "targets",
+    "prompts",
+    "response",
+    "scoring"
+  ],
   "properties": {
-    "id": { "type": "string", "pattern": "^[a-z0-9_\\-]+$" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
     "task_type": {
       "type": "string",
       "enum": [
@@ -20,9 +32,41 @@
         "transfer_apply"
       ]
     },
-    "tier": { "type": "integer", "minimum": 1, "maximum": 6 },
-    "difficulty": { "type": "integer", "minimum": 1, "maximum": 10 },
-    "time_estimate_sec": { "type": "integer", "minimum": 30, "maximum": 900 },
+    "tier": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 6
+    },
+    "difficulty": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "time_estimate_sec": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 900
+    },
+
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sentence", "target_word", "gloss"],
+      "properties": {
+        "sentence": {
+          "type": "string",
+          "minLength": 8
+        },
+        "target_word": {
+          "type": "string",
+          "minLength": 2
+        },
+        "gloss": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
 
     "targets": {
       "type": "object",
@@ -30,10 +74,22 @@
       "required": ["base"],
       "properties": {
         "base": { "type": "string" },
-        "prefixes": { "type": "array", "items": { "type": "string" } },
-        "suffixes": { "type": "array", "items": { "type": "string" } },
-        "words": { "type": "array", "items": { "type": "string" } },
-        "join_conventions": { "type": "array", "items": { "type": "string" } }
+        "prefixes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "suffixes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "words": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "join_conventions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
 
@@ -54,7 +110,14 @@
               "text": { "type": "string" },
               "intent": {
                 "type": "string",
-                "enum": ["meaning", "structure", "family", "grapheme_function", "join_convention", "transfer"]
+                "enum": [
+                  "meaning",
+                  "structure",
+                  "family",
+                  "grapheme_function",
+                  "join_convention",
+                  "transfer"
+                ]
               }
             }
           }
@@ -66,7 +129,10 @@
             "additionalProperties": false,
             "required": ["type", "content"],
             "properties": {
-              "type": { "type": "string", "enum": ["sentence_frame", "hint", "example", "definition"] },
+              "type": {
+                "type": "string",
+                "enum": ["sentence_frame", "hint", "example", "definition"]
+              },
               "content": { "type": "string" }
             }
           }
@@ -81,7 +147,13 @@
       "properties": {
         "mode": {
           "type": "string",
-          "enum": ["multiple_choice", "drag_drop", "short_text", "matrix_builder", "select_evidence"]
+          "enum": [
+            "multiple_choice",
+            "drag_drop",
+            "short_text",
+            "matrix_builder",
+            "select_evidence"
+          ]
         },
         "fields": {
           "type": "array",
@@ -94,9 +166,19 @@
               "label": { "type": "string" },
               "field_type": {
                 "type": "string",
-                "enum": ["text", "choice", "morpheme_chip", "word_chip", "matrix_cell", "evidence_pick"]
+                "enum": [
+                  "text",
+                  "choice",
+                  "morpheme_chip",
+                  "word_chip",
+                  "matrix_cell",
+                  "evidence_pick"
+                ]
               },
-              "options": { "type": "array", "items": { "type": "string" } }
+              "options": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           }
         }
@@ -116,7 +198,11 @@
             "required": ["criterion", "max_points"],
             "properties": {
               "criterion": { "type": "string" },
-              "max_points": { "type": "integer", "minimum": 1, "maximum": 5 }
+              "max_points": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              }
             }
           }
         },
@@ -124,10 +210,20 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["meaning_error", "structure_error", "family_error", "join_error", "grapheme_language_error"]
+            "enum": [
+              "meaning_error",
+              "structure_error",
+              "family_error",
+              "join_error",
+              "grapheme_language_error"
+            ]
           }
         },
-        "mastery_threshold": { "type": "number", "minimum": 0.5, "maximum": 1.0 }
+        "mastery_threshold": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.0
+        }
       }
     },
 
@@ -135,29 +231,14 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "notes_for_teacher": { "type": "string" }
-      }
-    }
-  },
-
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "response": {
-            "properties": {
-              "mode": { "enum": ["multiple_choice", "drag_drop", "short_text", "select_evidence"] }
-            },
-            "required": ["mode"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "response": { "required": ["fields"] }
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes_for_teacher": {
+          "type": "string"
         }
       }
     }
-  ]
+  }
 }
