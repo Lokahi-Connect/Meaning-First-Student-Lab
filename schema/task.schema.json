@@ -15,10 +15,7 @@
     "scoring"
   ],
   "properties": {
-    "id": {
-      "type": "string",
-      "pattern": "^[a-z0-9_\\-]+$"
-    },
+    "id": { "type": "string", "pattern": "^[a-z0-9_\\-]+$" },
     "task_type": {
       "type": "string",
       "enum": [
@@ -32,38 +29,30 @@
         "transfer_apply"
       ]
     },
-    "tier": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 6
-    },
-    "difficulty": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 10
-    },
-    "time_estimate_sec": {
-      "type": "integer",
-      "minimum": 30,
-      "maximum": 900
-    },
+    "tier": { "type": "integer", "minimum": 1, "maximum": 6 },
+    "difficulty": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "time_estimate_sec": { "type": "integer", "minimum": 30, "maximum": 900 },
 
     "context": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sentence", "target_word", "gloss"],
+      "required": ["sentences", "target_word", "gloss"],
       "properties": {
-        "sentence": {
-          "type": "string",
-          "minLength": 8
+        "sentences": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 8 }
         },
-        "target_word": {
-          "type": "string",
-          "minLength": 2
-        },
-        "gloss": {
-          "type": "string",
-          "minLength": 3
+        "target_word": { "type": "string", "minLength": 2 },
+        "gloss": { "type": "string", "minLength": 3 },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["src"],
+          "properties": {
+            "src": { "type": "string", "minLength": 3 },
+            "caption": { "type": "string" }
+          }
         }
       }
     },
@@ -74,22 +63,10 @@
       "required": ["base"],
       "properties": {
         "base": { "type": "string" },
-        "prefixes": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "suffixes": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "words": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "join_conventions": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
+        "prefixes": { "type": "array", "items": { "type": "string" } },
+        "suffixes": { "type": "array", "items": { "type": "string" } },
+        "words": { "type": "array", "items": { "type": "string" } },
+        "join_conventions": { "type": "array", "items": { "type": "string" } }
       }
     },
 
@@ -175,10 +152,7 @@
                   "evidence_pick"
                 ]
               },
-              "options": {
-                "type": "array",
-                "items": { "type": "string" }
-              }
+              "options": { "type": "array", "items": { "type": "string" } }
             }
           }
         }
@@ -198,11 +172,7 @@
             "required": ["criterion", "max_points"],
             "properties": {
               "criterion": { "type": "string" },
-              "max_points": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 5
-              }
+              "max_points": { "type": "integer", "minimum": 1, "maximum": 5 }
             }
           }
         },
@@ -219,11 +189,7 @@
             ]
           }
         },
-        "mastery_threshold": {
-          "type": "number",
-          "minimum": 0.5,
-          "maximum": 1.0
-        }
+        "mastery_threshold": { "type": "number", "minimum": 0.5, "maximum": 1.0 }
       }
     },
 
@@ -231,13 +197,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "tags": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "notes_for_teacher": {
-          "type": "string"
-        }
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "notes_for_teacher": { "type": "string" }
       }
     }
   }
