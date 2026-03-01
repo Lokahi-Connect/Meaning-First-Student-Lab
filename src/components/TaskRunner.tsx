@@ -58,7 +58,6 @@ export function TaskRunner({
   canContinue,
   showGloss = true,
 }: Props) {
-  const fields = task.response.fields || [];
   const ctx: any = (task as any).context || {};
   const targets: any = (task as any).targets || {};
 
@@ -92,7 +91,6 @@ export function TaskRunner({
       <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
-        {/* Sentence Context */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           {sentences.length ? (
             <div style={{ marginBottom: 10 }}>
@@ -130,12 +128,12 @@ export function TaskRunner({
           </ol>
         </div>
 
-        {/* Matrix Builder */}
         {task.response.mode === "matrix_builder" ? (
           <MatrixBuilder
             base={targets.base}
             prefixes={targets.prefixes || []}
             suffixes={targets.suffixes || []}
+            allowedWords={immediateFamily}
             selected={matrixSelected}
             onChangeSelected={(next) =>
               setResponses({
@@ -145,20 +143,13 @@ export function TaskRunner({
               })
             }
             proofWord={proofWord}
-            onChangeProofWord={(next) =>
-              setResponses({ ...responses, matrix_proof_word: next })
-            }
+            onChangeProofWord={(next) => setResponses({ ...responses, matrix_proof_word: next })}
             wordSum={wordSum}
-            onChangeWordSum={(next) =>
-              setResponses({ ...responses, matrix_word_sum: next })
-            }
+            onChangeWordSum={(next) => setResponses({ ...responses, matrix_word_sum: next })}
           />
         ) : null}
 
-        {/* Family Metaphor Panel */}
-        {(immediateFamily.length > 0 ||
-          relatedForms.length > 0 ||
-          twinBases.length > 0) && (
+        {(immediateFamily.length > 0 || relatedForms.length > 0 || twinBases.length > 0) && (
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ fontWeight: 800, marginBottom: 8 }}>Word Family Relationships</div>
 
@@ -166,7 +157,7 @@ export function TaskRunner({
               <div style={{ marginBottom: 10 }}>
                 <div style={{ fontWeight: 700 }}>Immediate Family</div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
-                  These words share the same base spelling.
+                  These words share the same base element (matrix belongs here).
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {immediateFamily.map((w: string) => (
@@ -191,7 +182,7 @@ export function TaskRunner({
               <div style={{ marginBottom: 10 }}>
                 <div style={{ fontWeight: 700 }}>Related Forms</div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
-                  Meaning-related, but not built by keeping the same base spelling.
+                  Meaning-related, but not built by keeping the same base spelling in a matrix.
                 </div>
                 {relatedForms.map((r: any) => (
                   <div key={r.word} style={{ marginBottom: 4 }}>
@@ -205,7 +196,7 @@ export function TaskRunner({
               <div>
                 <div style={{ fontWeight: 700 }}>Twin Bases</div>
                 <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
-                  Alternate base spellings that represent the same core meaning.
+                  Alternate base spellings that represent the same core meaning (explicitly labeled).
                 </div>
                 {twinBases.map((t: any) => (
                   <div key={t.base} style={{ marginBottom: 4 }}>
@@ -217,11 +208,8 @@ export function TaskRunner({
           </div>
         )}
 
-        {/* Mediator */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>
-            {mediatorTitle || "Mediator"}
-          </div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>{mediatorTitle || "Mediator"}</div>
           {mediatorPrompts?.length ? (
             <ul style={{ paddingLeft: 18, margin: 0 }}>
               {mediatorPrompts.map((p, i) => (
@@ -233,6 +221,40 @@ export function TaskRunner({
           ) : (
             <div>Write your responses, then click “Check my evidence”.</div>
           )}
+
+          <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+            <button
+              onClick={onCheck}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1px solid #111",
+                background: "white",
+                cursor: "pointer",
+                fontWeight: 800,
+              }}
+            >
+              Check my evidence
+            </button>
+
+            <button
+              onClick={onContinue}
+              disabled={!canContinue}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1px solid #111",
+                background: canContinue ? "white" : "#f3f3f3",
+                cursor: canContinue ? "pointer" : "not-allowed",
+                fontWeight: 800,
+                opacity: canContinue ? 1 : 0.6,
+              }}
+            >
+              Continue
+            </button>
+          </div>
+
+          {statusText ? <div style={{ marginTop: 10 }}>{statusText}</div> : null}
         </div>
       </div>
     </div>
