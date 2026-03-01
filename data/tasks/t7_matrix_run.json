@@ -3,12 +3,13 @@
   "task_type": "matrix_build",
   "tier": 2,
   "difficulty": 6,
-  "time_estimate_sec": 420,
+  "time_estimate_sec": 480,
 
   "context": {
     "sentences": [
       "He is running to catch the bus.",
-      "She runs fast around the track."
+      "She runs fast around the track.",
+      "Yesterday, she ran the race."
     ],
     "target_word": "running",
     "gloss": "moving quickly on foot (in progress)",
@@ -21,7 +22,7 @@
   "targets": {
     "base": "run",
     "prefixes": ["re"],
-    "suffixes": ["s", "ing"],
+    "suffixes": ["s", "ing", "ed"],
 
     "words": [
       "run",
@@ -77,7 +78,7 @@
   },
 
   "metadata": {
-    "tags": ["matrix", "cvc_double", "tier2", "word_family"],
-    "notes_for_teacher": "Matrix words preserve the base spelling <run>. Treat <ran> as a family relative / twin-base example."
+    "tags": ["matrix", "cvc_double", "tier2", "word_family", "ed_contrast"],
+    "notes_for_teacher": "Matrix words preserve the base spelling <run>. The form <run + ed> is not standard English. Use this to contrast regular suffixing with the twin-base form <ran>."
   }
 }
