@@ -1,12 +1,3 @@
-<div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, marginBottom: 10 }}>
-  <div style={{ fontWeight: 700, marginBottom: 6 }}>Sentence</div>
-  <div style={{ fontSize: 16, marginBottom: 6 }}>{task.context.sentence}</div>
-  <div style={{ fontSize: 13, opacity: 0.8 }}>
-    Target word: <strong>{task.context.target_word}</strong> | Common meaning here:{" "}
-    <strong>{task.context.gloss}</strong>
-  </div>
-</div>
-
 import React from "react";
 import type { Task } from "../data/taskIndex";
 import type { ResponseMap } from "../scoring/scoreV1";
@@ -23,7 +14,44 @@ type Props = {
   mediatorTitle?: string;
   mediatorPrompts?: string[];
   canContinue?: boolean;
+
+  // Optional control if you decide to hide gloss from students later
+  showGloss?: boolean;
 };
+
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function HighlightedSentence({ sentence, target }: { sentence: string; target: string }) {
+  const t = (target || "").trim();
+  if (!t) return <span>{sentence}</span>;
+
+  const re = new RegExp(`(${escapeRegExp(t)})`, "gi");
+  const parts = sentence.split(re);
+
+  return (
+    <span>
+      {parts.map((p, i) => {
+        const isMatch = p.toLowerCase() === t.toLowerCase();
+        return isMatch ? (
+          <mark
+            key={i}
+            style={{
+              padding: "0 4px",
+              borderRadius: 6,
+              background: "#fff3b0",
+            }}
+          >
+            {p}
+          </mark>
+        ) : (
+          <span key={i}>{p}</span>
+        );
+      })}
+    </span>
+  );
+}
 
 export function TaskRunner({
   task,
@@ -35,15 +63,74 @@ export function TaskRunner({
   mediatorTitle,
   mediatorPrompts,
   canContinue,
+  showGloss = true,
 }: Props) {
   const fields = task.response.fields || [];
+
+  // Supports BOTH formats so you don’t have to update every task at once:
+  // - old: task.context.sentence (string)
+  // - new: task.context.sentences (string[])
+  const sentences: string[] =
+    (task as any).context?.sentences?.length
+      ? (task as any).context.sentences
+      : (task as any).context?.sentence
+        ? [(task as any).context.sentence]
+        : [];
+
+  const targetWord = (task as any).context?.target_word || "";
+  const gloss = (task as any).context?.gloss || "";
+  const audio = (task as any).context?.audio;
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: 16, lineHeight: 1.4 }}>
       <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+        {/* Prompt + sentence-first context */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
+          {/* Sentence-first meaning anchor */}
+          {sentences.length ? (
+            <div
+              style={{
+                padding: 12,
+                border: "1px solid #ddd",
+                borderRadius: 12,
+                marginBottom: 10,
+              }}
+            >
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>Sentence context</div>
+
+              {sentences.map((s, idx) => (
+                <div key={idx} style={{ fontSize: 16, marginBottom: 6 }}>
+                  <HighlightedSentence sentence={s} target={targetWord} />
+                </div>
+              ))}
+
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>
+                Target word: <strong>{targetWord}</strong>
+                {showGloss && gloss ? (
+                  <>
+                    {" "}
+                    | Common meaning here: <strong>{gloss}</strong>
+                  </>
+                ) : null}
+              </div>
+
+              {/* Audio support (optional) */}
+              {audio?.src ? (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                    {audio.caption || "Listen"}
+                  </div>
+                  <audio controls src={audio.src} style={{ width: "100%" }} />
+                  <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
+                    Tip: listen once for meaning, then again while you track the highlighted word.
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           <div style={{ fontSize: 16, marginBottom: 8 }}>{task.prompts.stem}</div>
 
           <ol style={{ paddingLeft: 18, margin: 0 }}>
@@ -56,7 +143,7 @@ export function TaskRunner({
 
           {task.prompts.supports?.length ? (
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px dashed #ddd" }}>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>Supports</div>
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>Supports</div>
               <ul style={{ paddingLeft: 18, margin: 0 }}>
                 {task.prompts.supports.map((s, idx) => (
                   <li key={idx}>
@@ -68,16 +155,17 @@ export function TaskRunner({
           ) : null}
         </div>
 
+        {/* Response panel */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Your responses</div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>Your responses</div>
 
           {fields.map((f) => (
             <div key={f.id} style={{ marginBottom: 10 }}>
-              <label style={{ display: "block", fontWeight: 600, marginBottom: 4 }}>
+              <label style={{ display: "block", fontWeight: 700, marginBottom: 4 }}>
                 {f.label}
               </label>
               <textarea
-                value={responses[f.id] || ""}
+                value={(responses as any)[f.id] || ""}
                 onChange={(e) => setResponses({ ...responses, [f.id]: e.target.value })}
                 rows={3}
                 style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
@@ -94,7 +182,7 @@ export function TaskRunner({
                 border: "1px solid #111",
                 background: "white",
                 cursor: "pointer",
-                fontWeight: 700,
+                fontWeight: 800,
               }}
             >
               Check my evidence
@@ -109,7 +197,7 @@ export function TaskRunner({
                 border: "1px solid #111",
                 background: canContinue ? "white" : "#f3f3f3",
                 cursor: canContinue ? "pointer" : "not-allowed",
-                fontWeight: 700,
+                fontWeight: 800,
                 opacity: canContinue ? 1 : 0.6,
               }}
             >
@@ -120,8 +208,9 @@ export function TaskRunner({
           {statusText ? <div style={{ marginTop: 10 }}>{statusText}</div> : null}
         </div>
 
+        {/* Mediator panel */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{mediatorTitle || "Mediator"}</div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>{mediatorTitle || "Mediator"}</div>
           {mediatorPrompts?.length ? (
             <ul style={{ paddingLeft: 18, margin: 0 }}>
               {mediatorPrompts.map((p, i) => (
