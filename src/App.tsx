@@ -6,7 +6,7 @@ import type { ResponseMap } from "./scoring/scoreV1";
 import { guideV1 } from "./guidance/guideV1";
 
 export default function App() {
-  const [taskId, setTaskId] = useState<string>("t6_matrix_try");
+  const [taskId, setTaskId] = useState<string>("t7_matrix_run");
   const [responses, setResponses] = useState<ResponseMap>({});
   const [statusText, setStatusText] = useState<string>("");
 
