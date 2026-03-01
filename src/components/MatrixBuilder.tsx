@@ -4,8 +4,16 @@ type Props = {
   base: string;
   prefixes?: string[];
   suffixes?: string[];
+
   selected: string[];
   onChangeSelected: (next: string[]) => void;
+
+  // ✅ Proof requirement
+  proofWord: string; // the selected word they are proving
+  onChangeProofWord: (next: string) => void;
+
+  wordSum: string; // the student’s written proof
+  onChangeWordSum: (next: string) => void;
 };
 
 function uniq(arr: string[]) {
@@ -18,7 +26,7 @@ function normalizeAffix(a: string) {
 
 function buildWord(prefix: string, base: string, suffix: string) {
   // v1 intentionally does NOT apply join conventions.
-  // Matrix is for building family evidence first.
+  // The proof step is where we teach joins explicitly.
   return `${prefix}${base}${suffix}`;
 }
 
@@ -28,6 +36,10 @@ export function MatrixBuilder({
   suffixes = [],
   selected,
   onChangeSelected,
+  proofWord,
+  onChangeProofWord,
+  wordSum,
+  onChangeWordSum,
 }: Props) {
   const P = useMemo(() => uniq(prefixes.map(normalizeAffix)).filter(Boolean), [prefixes]);
   const S = useMemo(() => uniq(suffixes.map(normalizeAffix)).filter(Boolean), [suffixes]);
@@ -38,7 +50,18 @@ export function MatrixBuilder({
   function toggleWord(w: string) {
     const next = selected.includes(w) ? selected.filter((x) => x !== w) : [...selected, w];
     onChangeSelected(next);
+
+    // If no proof word chosen yet, set it to the first selected word.
+    if (!proofWord && next.length) onChangeProofWord(next[0]);
+
+    // If proof word got unselected, move proof target to the first remaining selected word.
+    if (proofWord && !next.includes(proofWord)) {
+      onChangeProofWord(next[0] || "");
+      onChangeWordSum("");
+    }
   }
+
+  const hasSelected = selected.length > 0;
 
   return (
     <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, marginBottom: 12 }}>
@@ -127,7 +150,7 @@ export function MatrixBuilder({
 
       <div style={{ marginTop: 12 }}>
         <div style={{ fontWeight: 800, marginBottom: 6 }}>Selected words (evidence)</div>
-        {selected.length ? (
+        {hasSelected ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {selected.map((w) => (
               <span
@@ -147,6 +170,76 @@ export function MatrixBuilder({
         ) : (
           <div style={{ opacity: 0.75 }}>No words selected yet.</div>
         )}
+      </div>
+
+      {/* ✅ Required proof step */}
+      <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #ddd" }}>
+        <div style={{ fontWeight: 800, marginBottom: 6 }}>Proof (required before Continue)</div>
+
+        <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 8 }}>
+          Choose one selected word, then write a word sum that resembles the word and shows its structure.
+        </div>
+
+        <div style={{ display: "grid", gap: 8 }}>
+          <label style={{ fontWeight: 700 }}>
+            Proof word
+            <select
+              value={proofWord}
+              onChange={(e) => {
+                onChangeProofWord(e.target.value);
+                onChangeWordSum("");
+              }}
+              disabled={!hasSelected}
+              style={{
+                width: "100%",
+                marginTop: 6,
+                padding: 10,
+                borderRadius: 10,
+                border: "1px solid #ccc",
+              }}
+            >
+              <option value="" disabled>
+                {hasSelected ? "Select a word…" : "Select words above first…"}
+              </option>
+              {selected.map((w) => (
+                <option key={w} value={w}>
+                  {w}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label style={{ fontWeight: 700 }}>
+            Word sum proof
+            <textarea
+              value={wordSum}
+              onChange={(e) => onChangeWordSum(e.target.value)}
+              rows={3}
+              placeholder={
+                proofWord
+                  ? `<${proofWord}> = <${base}> + <affix> (then explain the join if needed)`
+                  : "Choose a proof word first."
+              }
+              disabled={!proofWord}
+              style={{
+                width: "100%",
+                marginTop: 6,
+                padding: 10,
+                borderRadius: 10,
+                border: "1px solid #ccc",
+              }}
+            />
+          </label>
+
+          <div style={{ fontSize: 12, opacity: 0.8 }}>
+            Sentence frames you can follow:
+            <ul style={{ margin: "6px 0 0 18px" }}>
+              <li>The base in this word family is &lt;____&gt;.</li>
+              <li>&lt;____&gt; = &lt;base&gt; + &lt;affix&gt;.</li>
+              <li>At the join, the spelling ________ because ________.</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
