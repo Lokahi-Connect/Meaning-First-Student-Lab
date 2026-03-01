@@ -6,7 +6,7 @@ import type { ResponseMap } from "./scoring/scoreV1";
 import { guideV1 } from "./guidance/guideV1";
 
 export default function App() {
-  const [taskId, setTaskId] = useState<string>("t1_jump_ing_join");
+  const [taskId, setTaskId] = useState<string>("t4_matrix_jump");
   const [responses, setResponses] = useState<ResponseMap>({});
   const [statusText, setStatusText] = useState<string>("");
 
