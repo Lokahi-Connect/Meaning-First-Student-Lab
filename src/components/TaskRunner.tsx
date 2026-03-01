@@ -1,3 +1,12 @@
+<div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, marginBottom: 10 }}>
+  <div style={{ fontWeight: 700, marginBottom: 6 }}>Sentence</div>
+  <div style={{ fontSize: 16, marginBottom: 6 }}>{task.context.sentence}</div>
+  <div style={{ fontSize: 13, opacity: 0.8 }}>
+    Target word: <strong>{task.context.target_word}</strong> | Common meaning here:{" "}
+    <strong>{task.context.gloss}</strong>
+  </div>
+</div>
+
 import React from "react";
 import type { Task } from "../data/taskIndex";
 import type { ResponseMap } from "../scoring/scoreV1";
