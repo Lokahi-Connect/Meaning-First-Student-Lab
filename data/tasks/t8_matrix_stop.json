@@ -40,7 +40,7 @@
 },
 
 "prompts": {
-"stem": "Build a matrix for this base. Select words that keep the base spelling stable, then prove one with a word sum, a join note, and a spelling rebuild.",
+"stem": "Build a matrix for this base. Select words that keep the base spelling stable, then prove one with a word sum and a join note. After that, try spelling the whole word using your join reasoning (feedback only).",
 "questions": [
 {
 "id": "q1",
@@ -64,14 +64,14 @@
 },
 {
 "id": "q5",
-"text": "Now spell the whole word using your word sum + join note.",
+"text": "Optional: Spell the whole word using your word sum + join note (feedback only).",
 "intent": "spelling_rebuild"
 }
 ],
 "supports": [
 {
 "type": "sentence_frame",
-"content": "In this sentence, <stopping> means ********."
+"content": "In this sentence, <stopping> means ________."
 },
 {
 "type": "sentence_frame",
@@ -79,23 +79,23 @@
 },
 {
 "type": "sentence_frame",
-"content": "One word I built is <****> = <stop> + <affix>."
+"content": "One word I built is <____> = <stop> + <affix>."
 },
 {
 "type": "sentence_frame",
-"content": "Join note: The spelling changes by ________ because ________."
+"content": "Join note: The spelling changes by ________ because ********."
 },
 {
 "type": "sentence_frame",
-"content": "Spelling rebuild: I start with <stop>, then I ________ (join step), then I add <****> to spell <********>."
+"content": "Spelling rebuild (optional): Start with <stop>. Apply the join step. Add the suffix to spell <********>."
 }
 ]
 },
 
 "response": {
 "mode": "matrix_builder",
-"requires_spelling_rebuild": true,
-"spelling_rebuild_prompt": "Type the final spelled word you built from your word sum and join note.",
+"requires_spelling_rebuild": false,
+"spelling_rebuild_prompt": "Optional: Type the final spelled word you built from your word sum and join note.",
 "spelling_rebuild_examples": ["stopping", "stopped"]
 },
 
@@ -114,16 +114,16 @@
 "max_points": 2
 },
 {
-"criterion": "Correctly spells the whole word from the word sum + join note",
-"max_points": 2
+"criterion": "Attempts to spell the whole word from the word sum + join note (feedback only)",
+"max_points": 1
 }
 ],
-"error_tags": ["meaning_error", "structure_error", "family_error", "join_error", "spelling_error"],
+"error_tags": ["meaning_error", "structure_error", "family_error", "join_error"],
 "mastery_threshold": 0.75
 },
 
 "metadata": {
-"tags": ["matrix", "cvc_double", "tier2", "stop", "ed_ing_contrast", "spelling_rebuild"],
-"notes_for_teacher": "This task highlights the doubling convention for CVC bases before vowel suffixes (<-ing>, <-ed>). Students should notice that the base spelling <stop> stays stable, and the final consonant doubles at the join. Students then rebuild the final spelling from their word sum + join note."
+"tags": ["matrix", "cvc_double", "tier2", "stop", "ed_ing_contrast", "spelling_rebuild_optional"],
+"notes_for_teacher": "This task highlights the doubling convention for CVC bases before vowel suffixes (<-ing>, <-ed>). Students should notice that the base spelling <stop> stays stable, and the final consonant doubles at the join. Spelling rebuild is optional and used for feedback, not gating."
 }
 }
