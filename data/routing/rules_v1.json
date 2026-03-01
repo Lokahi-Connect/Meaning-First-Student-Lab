@@ -1,23 +1,9 @@
 {
-  "version": "v1",
   "routes": [
     {
-      "from_task_type": "join_convention_check",
-      "if_error_tag": "join_error",
-      "to_task_id": "t2_make_ing_join",
-      "note": "Escalate to a contrast join case to force noticing."
-    },
-    {
-      "from_task_type": "join_convention_check",
+      "from_task_type": "matrix_build",
       "if_mastered": true,
-      "to_task_id": "t3_transfer_bake_ing",
-      "note": "If mastered, push transfer to a new base."
-    },
-    {
-      "from_task_type": "transfer_apply",
-      "if_error_tag": "join_error",
-      "to_task_id": "t2_make_ing_join",
-      "note": "If transfer fails, return to explicit join work."
+      "to_task_id": "t8_matrix_stop"
     }
   ]
 }
