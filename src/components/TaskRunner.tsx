@@ -93,8 +93,6 @@ export function TaskRunner({
   // ----------------------------
   // PREFIX GATING (Developmental Control)
   // ----------------------------
-  // Prefixes are hidden unless explicitly enabled in task JSON:
-  // "allow_prefixes": true
   const allowPrefixes = Boolean((task as any).allow_prefixes);
   const gatedPrefixes: string[] = allowPrefixes ? targets.prefixes || [] : [];
 
@@ -110,9 +108,9 @@ export function TaskRunner({
   const wordSum = (responses as any).matrix_word_sum || "";
 
   // ----------------------------
-  // OPTIONAL SPELLING REBUILD (Feedback-only unless you gate it later)
+  // MORPHEME → SPELLING REBUILD UI (Feedback-only)
   // ----------------------------
-  const hasSpellingRebuildUI = Boolean(
+  const showRebuildUI = Boolean(
     responseCfg?.spelling_rebuild_prompt ||
       (Array.isArray(responseCfg?.spelling_rebuild_examples) &&
         responseCfg.spelling_rebuild_examples.length > 0) ||
@@ -120,11 +118,19 @@ export function TaskRunner({
       responseCfg?.requires_spelling_rebuild === false
   );
 
-  const spellingRebuild = (responses as any).spelling_rebuild || "";
-  const spellingRebuildPrompt =
+  const rebuildBase = (responses as any).rebuild_base || "";
+  const rebuildSuffix = (responses as any).rebuild_suffix || "";
+  const rebuildWord = (responses as any).rebuild_word || "";
+
+  const suffixOptions: string[] = Array.isArray(targets?.suffixes)
+    ? targets.suffixes
+    : [];
+
+  const rebuildPrompt =
     responseCfg?.spelling_rebuild_prompt ||
-    "Optional: Type the final spelled word you built from your word sum and join note.";
-  const spellingRebuildExamples: string[] = Array.isArray(
+    "Optional: Build the word by typing morphemes first, then spell the whole word after applying the join convention.";
+
+  const rebuildExamples: string[] = Array.isArray(
     responseCfg?.spelling_rebuild_examples
   )
     ? responseCfg.spelling_rebuild_examples
@@ -139,7 +145,9 @@ export function TaskRunner({
         lineHeight: 1.4,
       }}
     >
-      <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 8 }}>
+        Meaning-First Student Lab
+      </h1>
 
       <div style={{ display: "grid", gap: 12 }}>
         {/* ---------------- Context Block ---------------- */}
@@ -167,7 +175,8 @@ export function TaskRunner({
                 {baseFocus ? (
                   <>
                     {" "}
-                    | Base under investigation: <strong>&lt;{baseFocus}&gt;</strong>
+                    | Base under investigation:{" "}
+                    <strong>&lt;{baseFocus}&gt;</strong>
                   </>
                 ) : null}
                 {showGloss && gloss ? (
@@ -241,8 +250,8 @@ export function TaskRunner({
               }
             />
 
-            {/* ---------------- Optional Spelling Rebuild ---------------- */}
-            {hasSpellingRebuildUI && (
+            {/* -------- Morphemes → Then Spell Whole Word (Feedback-only) -------- */}
+            {showRebuildUI && (
               <div
                 style={{
                   marginTop: 12,
@@ -251,42 +260,113 @@ export function TaskRunner({
                 }}
               >
                 <div style={{ fontWeight: 800, marginBottom: 6 }}>
-                  Spelling rebuild (feedback only)
+                  Morphemes → then spell the word (feedback only)
                 </div>
-                <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 8 }}>
-                  {spellingRebuildPrompt}
-                  {spellingRebuildExamples.length > 0 ? (
+
+                <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 10 }}>
+                  {rebuildPrompt}
+                  {rebuildExamples.length > 0 ? (
                     <>
                       {" "}
                       Examples:{" "}
-                      <strong>{spellingRebuildExamples.join(", ")}</strong>
+                      <strong>{rebuildExamples.join(", ")}</strong>
                     </>
                   ) : null}
                 </div>
 
-                <input
-                  value={spellingRebuild}
-                  onChange={(e) =>
-                    setResponses({
-                      ...responses,
-                      spelling_rebuild: e.target.value,
-                    })
-                  }
-                  placeholder={
-                    spellingRebuildExamples.length > 0
-                      ? spellingRebuildExamples[0]
-                      : "Type the word you built…"
-                  }
+                <div
                   style={{
-                    width: "100%",
-                    padding: "10px 12px",
-                    borderRadius: 10,
-                    border: "1px solid #ddd",
-                    fontSize: 16,
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 10,
+                    marginBottom: 10,
                   }}
-                />
-                <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
-                  Tip: Start with the base, apply the join step, then add the suffix.
+                >
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                      Base morpheme (type it)
+                    </div>
+                    <input
+                      value={rebuildBase}
+                      onChange={(e) =>
+                        setResponses({
+                          ...responses,
+                          rebuild_base: e.target.value,
+                        })
+                      }
+                      placeholder={baseFocus ? baseFocus : "base"}
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: 10,
+                        border: "1px solid #ddd",
+                        fontSize: 16,
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                      Suffix morpheme (choose one)
+                    </div>
+                    <select
+                      value={rebuildSuffix}
+                      onChange={(e) =>
+                        setResponses({
+                          ...responses,
+                          rebuild_suffix: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: 10,
+                        border: "1px solid #ddd",
+                        fontSize: 16,
+                        background: "white",
+                      }}
+                    >
+                      <option value="">Select a suffix…</option>
+                      {suffixOptions.map((suf: string) => (
+                        <option key={suf} value={suf}>
+                          {`<-${suf}>`}
+                        </option>
+                      ))}
+                    </select>
+                    <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
+                      Tip: pick the suffix that matches your proof word.
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                    Spell the completed word (after the join step)
+                  </div>
+                  <input
+                    value={rebuildWord}
+                    onChange={(e) =>
+                      setResponses({
+                        ...responses,
+                        rebuild_word: e.target.value,
+                      })
+                    }
+                    placeholder={
+                      rebuildExamples.length > 0
+                        ? rebuildExamples[0]
+                        : "Type the final spelling…"
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      borderRadius: 10,
+                      border: "1px solid #ddd",
+                      fontSize: 16,
+                    }}
+                  />
+                  <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
+                    Join reminder: CVC base + vowel suffix often doubles the final consonant (e.g., stop + ing → stopping).
+                  </div>
                 </div>
               </div>
             )}
