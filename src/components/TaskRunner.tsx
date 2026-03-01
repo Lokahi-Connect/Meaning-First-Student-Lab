@@ -35,10 +35,7 @@ function HighlightedSentence({ sentence, target }: { sentence: string; target: s
       {parts.map((p, i) => {
         const isMatch = p.toLowerCase() === t.toLowerCase();
         return isMatch ? (
-          <mark
-            key={i}
-            style={{ padding: "0 4px", borderRadius: 6, background: "#fff3b0" }}
-          >
+          <mark key={i} style={{ padding: "0 4px", borderRadius: 6, background: "#fff3b0" }}>
             {p}
           </mark>
         ) : (
@@ -63,9 +60,6 @@ export function TaskRunner({
 }: Props) {
   const fields = task.response.fields || [];
 
-  // Supports both:
-  // - context.sentences (new)
-  // - context.sentence (old)
   const ctx: any = (task as any).context || {};
   const sentences: string[] = Array.isArray(ctx.sentences)
     ? ctx.sentences
@@ -77,7 +71,6 @@ export function TaskRunner({
   const gloss = ctx.gloss || "";
   const audio = ctx.audio;
 
-  // Matrix selected storage
   const matrixSelected: string[] = (() => {
     try {
       return JSON.parse((responses as any).matrix_selected || "[]");
@@ -86,12 +79,14 @@ export function TaskRunner({
     }
   })();
 
+  const proofWord = (responses as any).matrix_proof_word || "";
+  const wordSum = (responses as any).matrix_word_sum || "";
+
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: 16, lineHeight: 1.4 }}>
       <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
-        {/* Prompt + sentence-first context */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           {sentences.length ? (
             <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, marginBottom: 10 }}>
@@ -148,11 +143,9 @@ export function TaskRunner({
           ) : null}
         </div>
 
-        {/* Responses */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>Your responses</div>
 
-          {/* ✅ Matrix builder renders HERE when the task mode is matrix_builder */}
           {task.response.mode === "matrix_builder" ? (
             <MatrixBuilder
               base={task.targets.base}
@@ -163,13 +156,26 @@ export function TaskRunner({
                 setResponses({
                   ...responses,
                   matrix_selected: JSON.stringify(next),
-                  family: next.join(", ")
+                  family: next.join(", "),
+                })
+              }
+              proofWord={proofWord}
+              onChangeProofWord={(next) =>
+                setResponses({
+                  ...responses,
+                  matrix_proof_word: next,
+                })
+              }
+              wordSum={wordSum}
+              onChangeWordSum={(next) =>
+                setResponses({
+                  ...responses,
+                  matrix_word_sum: next,
                 })
               }
             />
           ) : null}
 
-          {/* Textareas only for non-matrix tasks */}
           {task.response.mode !== "matrix_builder"
             ? fields.map((f) => (
                 <div key={f.id} style={{ marginBottom: 10 }}>
@@ -221,7 +227,6 @@ export function TaskRunner({
           {statusText ? <div style={{ marginTop: 10 }}>{statusText}</div> : null}
         </div>
 
-        {/* Mediator */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>{mediatorTitle || "Mediator"}</div>
           {mediatorPrompts?.length ? (
