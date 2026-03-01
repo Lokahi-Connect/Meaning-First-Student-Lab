@@ -5,6 +5,12 @@
   "difficulty": 3,
   "time_estimate_sec": 180,
 
+  "context": {
+    "sentence": "The puppy is jumping over the puddle.",
+    "target_word": "jumping",
+    "gloss": "in the process of jumping (happening now)"
+  },
+
   "targets": {
     "base": "jump",
     "suffixes": ["ing"],
@@ -13,82 +19,43 @@
   },
 
   "prompts": {
-    "stem": "We are building a word using a base and a suffix. Use meaning and structure first.",
+    "stem": "Start with meaning in the sentence. Then show structure. Then check the join.",
     "questions": [
-      {
-        "id": "q1",
-        "text": "What meaning does <-ing> add to this word?",
-        "intent": "meaning"
-      },
-      {
-        "id": "q2",
-        "text": "Show the structure of the word.",
-        "intent": "structure"
-      },
+      { "id": "q1", "text": "In this sentence, what does <jumping> mean?", "intent": "meaning" },
+      { "id": "q2", "text": "How is <jumping> built (structure)?", "intent": "structure" },
       {
         "id": "q3",
-        "text": "Check the join. Does anything change when we add <-ing> to <jump>?",
+        "text": "Check the join: compare <jump> with <jumping>. What changed (if anything)?",
         "intent": "join_convention"
       }
     ],
     "supports": [
-      {
-        "type": "sentence_frame",
-        "content": "The suffix <-ing> adds the meaning ________."
-      },
-      {
-        "type": "sentence_frame",
-        "content": "<jump> + <-ing> → <jumping> because ________."
-      }
+      { "type": "sentence_frame", "content": "In this sentence, <jumping> means ________." },
+      { "type": "sentence_frame", "content": "<jump> + <-ing> → <jumping> because ________." }
     ]
   },
 
   "response": {
     "mode": "short_text",
     "fields": [
-      {
-        "id": "meaning",
-        "label": "Meaning of <-ing>",
-        "field_type": "text"
-      },
-      {
-        "id": "structure",
-        "label": "Structure",
-        "field_type": "text"
-      },
-      {
-        "id": "join",
-        "label": "Join explanation",
-        "field_type": "text"
-      }
+      { "id": "meaning", "label": "Meaning in the sentence", "field_type": "text" },
+      { "id": "structure", "label": "Structure", "field_type": "text" },
+      { "id": "join", "label": "Join explanation", "field_type": "text" }
     ]
   },
 
   "scoring": {
     "rubric": [
-      {
-        "criterion": "Meaning statement reflects ongoing/process sense",
-        "max_points": 3
-      },
-      {
-        "criterion": "Structure correctly shows base + suffix",
-        "max_points": 2
-      },
-      {
-        "criterion": "Join explanation notes no spelling change",
-        "max_points": 2
-      }
+      { "criterion": "Meaning matches sentence use", "max_points": 2 },
+      { "criterion": "Structure shows base + suffix", "max_points": 2 },
+      { "criterion": "Join explanation states no change with evidence", "max_points": 3 }
     ],
-    "error_tags": [
-      "meaning_error",
-      "structure_error",
-      "join_error"
-    ],
+    "error_tags": ["meaning_error", "structure_error", "join_error"],
     "mastery_threshold": 0.75
   },
 
   "metadata": {
     "tags": ["ing", "tier2", "join_convention"],
-    "notes_for_teacher": "If learner defaults to sound-first rules, redirect to structural evidence."
+    "notes_for_teacher": "Keep meaning anchored to the sentence before moving to structure."
   }
 }
