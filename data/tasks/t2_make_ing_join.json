@@ -6,9 +6,16 @@
   "time_estimate_sec": 210,
 
   "context": {
-    "sentence": "We are making a birthday card for Grandpa.",
+    "sentences": [
+      "We are making a birthday card for Grandpa.",
+      "They are making dinner for the guests."
+    ],
     "target_word": "making",
-    "gloss": "in the process of making (doing it now)"
+    "gloss": "in the process of making (doing it now)",
+    "audio": {
+      "src": "/audio/t2_make_ing_join.mp3",
+      "caption": "Listen to the sentences"
+    }
   },
 
   "targets": {
@@ -19,15 +26,11 @@
   },
 
   "prompts": {
-    "stem": "Anchor meaning in the sentence. Then show structure. Then check the join.",
+    "stem": "Anchor meaning first. Then show structure. Then explain the join.",
     "questions": [
-      { "id": "q1", "text": "In this sentence, what does <making> mean?", "intent": "meaning" },
-      { "id": "q2", "text": "How is <making> built (structure)?", "intent": "structure" },
-      {
-        "id": "q3",
-        "text": "Check the join: compare <make> with <making>. What changed and why?",
-        "intent": "join_convention"
-      }
+      { "id": "q1", "text": "In these sentences, what does <making> mean?", "intent": "meaning" },
+      { "id": "q2", "text": "How is <making> built?", "intent": "structure" },
+      { "id": "q3", "text": "Compare <make> and <making>. What changed and why?", "intent": "join_convention" }
     ],
     "supports": [
       { "type": "sentence_frame", "content": "In this sentence, <making> means ________." },
@@ -38,9 +41,9 @@
   "response": {
     "mode": "short_text",
     "fields": [
-      { "id": "meaning", "label": "Meaning in the sentence", "field_type": "text" },
+      { "id": "meaning", "label": "Meaning in context", "field_type": "text" },
       { "id": "structure", "label": "Structure", "field_type": "text" },
-      { "id": "join", "label": "Join explanation", "field_type": "text" }
+      { "id": "join", "label": "Join reasoning", "field_type": "text" }
     ]
   },
 
@@ -48,14 +51,14 @@
     "rubric": [
       { "criterion": "Meaning matches sentence use", "max_points": 2 },
       { "criterion": "Structure shows base + suffix", "max_points": 2 },
-      { "criterion": "Join explanation identifies the final <e> change with evidence", "max_points": 3 }
+      { "criterion": "Join explanation identifies final <e> drop with evidence", "max_points": 3 }
     ],
     "error_tags": ["meaning_error", "structure_error", "join_error"],
     "mastery_threshold": 0.75
   },
 
   "metadata": {
-    "tags": ["ing", "final_e", "join_convention", "tier2"],
-    "notes_for_teacher": "Ask: ‘What is the base spelling in a related word?’"
+    "tags": ["ing", "final_e", "tier2"],
+    "notes_for_teacher": "Ask: What happens to the final <e> before a vowel suffix?"
   }
 }
