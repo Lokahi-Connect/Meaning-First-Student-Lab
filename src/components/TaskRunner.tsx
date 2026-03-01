@@ -14,9 +14,6 @@ type Props = {
   mediatorTitle?: string;
   mediatorPrompts?: string[];
   canContinue?: boolean;
-
-  // Optional control if you decide to hide gloss from students later
-  showGloss?: boolean;
 };
 
 function escapeRegExp(s: string) {
@@ -24,7 +21,7 @@ function escapeRegExp(s: string) {
 }
 
 function HighlightedSentence({ sentence, target }: { sentence: string; target: string }) {
-  const t = (target || "").trim();
+  const t = target.trim();
   if (!t) return <span>{sentence}</span>;
 
   const re = new RegExp(`(${escapeRegExp(t)})`, "gi");
@@ -40,7 +37,7 @@ function HighlightedSentence({ sentence, target }: { sentence: string; target: s
             style={{
               padding: "0 4px",
               borderRadius: 6,
-              background: "#fff3b0",
+              background: "#fff3b0"
             }}
           >
             {p}
@@ -63,73 +60,45 @@ export function TaskRunner({
   mediatorTitle,
   mediatorPrompts,
   canContinue,
-  showGloss = true,
 }: Props) {
   const fields = task.response.fields || [];
-
-  // Supports BOTH formats so you don’t have to update every task at once:
-  // - old: task.context.sentence (string)
-  // - new: task.context.sentences (string[])
-  const sentences: string[] =
-    (task as any).context?.sentences?.length
-      ? (task as any).context.sentences
-      : (task as any).context?.sentence
-        ? [(task as any).context.sentence]
-        : [];
-
-  const targetWord = (task as any).context?.target_word || "";
-  const gloss = (task as any).context?.gloss || "";
-  const audio = (task as any).context?.audio;
+  const sentences = task.context?.sentences || [];
+  const targetWord = task.context?.target_word || "";
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: 16, lineHeight: 1.4 }}>
       <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
-        {/* Prompt + sentence-first context */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-          {/* Sentence-first meaning anchor */}
-          {sentences.length ? (
-            <div
-              style={{
-                padding: 12,
-                border: "1px solid #ddd",
-                borderRadius: 12,
-                marginBottom: 10,
-              }}
-            >
-              <div style={{ fontWeight: 800, marginBottom: 6 }}>Sentence context</div>
+          {/* Sentence-first context block */}
+          <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 12, marginBottom: 10 }}>
+            <div style={{ fontWeight: 800, marginBottom: 6 }}>Sentence context</div>
 
-              {sentences.map((s, idx) => (
-                <div key={idx} style={{ fontSize: 16, marginBottom: 6 }}>
-                  <HighlightedSentence sentence={s} target={targetWord} />
-                </div>
-              ))}
-
-              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>
-                Target word: <strong>{targetWord}</strong>
-                {showGloss && gloss ? (
-                  <>
-                    {" "}
-                    | Common meaning here: <strong>{gloss}</strong>
-                  </>
-                ) : null}
+            {sentences.map((s: string, idx: number) => (
+              <div key={idx} style={{ fontSize: 16, marginBottom: 6 }}>
+                <HighlightedSentence sentence={s} target={targetWord} />
               </div>
+            ))}
 
-              {/* Audio support (optional) */}
-              {audio?.src ? (
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                    {audio.caption || "Listen"}
-                  </div>
-                  <audio controls src={audio.src} style={{ width: "100%" }} />
-                  <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
-                    Tip: listen once for meaning, then again while you track the highlighted word.
-                  </div>
-                </div>
-              ) : null}
+            <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>
+              Target word: <strong>{task.context.target_word}</strong>
+              {"  "} | {"  "}
+              Common meaning here: <strong>{task.context.gloss}</strong>
             </div>
-          ) : null}
+
+            {task.context.audio?.src ? (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                  {task.context.audio.caption || "Listen"}
+                </div>
+                <audio controls src={task.context.audio.src} style={{ width: "100%" }} />
+                <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
+                  Tip: listen once for meaning, then again while you look at the highlighted word.
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <div style={{ fontSize: 16, marginBottom: 8 }}>{task.prompts.stem}</div>
 
@@ -155,7 +124,6 @@ export function TaskRunner({
           ) : null}
         </div>
 
-        {/* Response panel */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>Your responses</div>
 
@@ -165,7 +133,7 @@ export function TaskRunner({
                 {f.label}
               </label>
               <textarea
-                value={(responses as any)[f.id] || ""}
+                value={responses[f.id] || ""}
                 onChange={(e) => setResponses({ ...responses, [f.id]: e.target.value })}
                 rows={3}
                 style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
@@ -208,7 +176,6 @@ export function TaskRunner({
           {statusText ? <div style={{ marginTop: 10 }}>{statusText}</div> : null}
         </div>
 
-        {/* Mediator panel */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>{mediatorTitle || "Mediator"}</div>
           {mediatorPrompts?.length ? (
