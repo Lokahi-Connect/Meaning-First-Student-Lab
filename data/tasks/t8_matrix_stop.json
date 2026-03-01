@@ -1,129 +1,120 @@
 {
-"id": "t8_matrix_stop",
-"task_type": "matrix_build",
-"tier": 2,
-"difficulty": 6,
-"time_estimate_sec": 480,
-
-"context": {
-"sentences": [
-"The bus is stopping at the corner.",
-"He stops when the light turns red.",
-"Yesterday, she stopped at the store."
-],
-"target_word": "stopping",
-"base_focus": "stop",
-"gloss": "coming to an end (in progress)",
-"audio": {
-"src": "/audio/t8_matrix_stop.mp3",
-"caption": "Listen to the sentences"
-}
-},
-
-"targets": {
-"base": "stop",
-"prefixes": [],
-"suffixes": ["s", "ing", "ed"],
-
-```
-"words": [
-  "stop",
-  "stops",
-  "stopping",
-  "stopped"
-],
-
-"family_relatives": [],
-"twin_bases": []
-```
-
-},
-
-"prompts": {
-"stem": "Build a matrix for this base. Select words that keep the base spelling stable, then prove one with a word sum and a join note. After that, try spelling the whole word using your join reasoning (feedback only).",
-"questions": [
-{
-"id": "q1",
-"text": "In the sentence context, what does <stopping> mean?",
-"intent": "meaning"
-},
-{
-"id": "q2",
-"text": "What is the base that carries the core meaning across the matrix words?",
-"intent": "structure"
-},
-{
-"id": "q3",
-"text": "Use the matrix to generate related words that keep the base spelling stable. Select at least four.",
-"intent": "family"
-},
-{
-"id": "q4",
-"text": "Choose one selected word and write a word sum that resembles it. Include a join note.",
-"intent": "join_convention"
-},
-{
-"id": "q5",
-"text": "Optional: Spell the whole word using your word sum + join note (feedback only).",
-"intent": "spelling_rebuild"
-}
-],
-"supports": [
-{
-"type": "sentence_frame",
-"content": "In this sentence, <stopping> means ________."
-},
-{
-"type": "sentence_frame",
-"content": "The base in this word family is <stop> because it carries the core meaning across related words."
-},
-{
-"type": "sentence_frame",
-"content": "One word I built is <____> = <stop> + <affix>."
-},
-{
-"type": "sentence_frame",
-"content": "Join note: The spelling changes by ________ because ********."
-},
-{
-"type": "sentence_frame",
-"content": "Spelling rebuild (optional): Start with <stop>. Apply the join step. Add the suffix to spell <********>."
-}
-]
-},
-
-"response": {
-"mode": "matrix_builder",
-"requires_spelling_rebuild": false,
-"spelling_rebuild_prompt": "Optional: Type the final spelled word you built from your word sum and join note.",
-"spelling_rebuild_examples": ["stopping", "stopped"]
-},
-
-"scoring": {
-"rubric": [
-{
-"criterion": "Selects multiple matrix-buildable words that preserve the base spelling",
-"max_points": 3
-},
-{
-"criterion": "Produces a word sum proof that resembles the chosen word",
-"max_points": 2
-},
-{
-"criterion": "Includes a join note supported by letter evidence",
-"max_points": 2
-},
-{
-"criterion": "Attempts to spell the whole word from the word sum + join note (feedback only)",
-"max_points": 1
-}
-],
-"error_tags": ["meaning_error", "structure_error", "family_error", "join_error"],
-"mastery_threshold": 0.75
-},
-
-"metadata": {
-"tags": ["matrix", "cvc_double", "tier2", "stop", "ed_ing_contrast", "spelling_rebuild_optional"],
-"notes_for_teacher": "This task highlights the doubling convention for CVC bases before vowel suffixes (<-ing>, <-ed>). Students should notice that the base spelling <stop> stays stable, and the final consonant doubles at the join. Spelling rebuild is optional and used for feedback, not gating."
-}
+  "id": "t8_matrix_stop",
+  "task_type": "matrix_build",
+  "tier": 2,
+  "difficulty": 6,
+  "time_estimate_sec": 480,
+  "context": {
+    "sentences": [
+      "The bus is stopping at the corner.",
+      "He stops when the light turns red.",
+      "Yesterday, she stopped at the store."
+    ],
+    "target_word": "stopping",
+    "base_focus": "stop",
+    "gloss": "coming to an end (in progress)",
+    "audio": {
+      "src": "/audio/t8_matrix_stop.mp3",
+      "caption": "Listen to the sentences"
+    }
+  },
+  "targets": {
+    "base": "stop",
+    "prefixes": [],
+    "suffixes": ["s", "ing", "ed"],
+    "words": ["stop", "stops", "stopping", "stopped"],
+    "family_relatives": [],
+    "twin_bases": []
+  },
+  "prompts": {
+    "stem": "Build a matrix for this base. Select words that keep the base spelling stable, then prove one with a word sum and a join note. After that, try spelling the whole word using your join reasoning (feedback only).",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "In the sentence context, what does <stopping> mean?",
+        "intent": "meaning"
+      },
+      {
+        "id": "q2",
+        "text": "What is the base that carries the core meaning across the matrix words?",
+        "intent": "structure"
+      },
+      {
+        "id": "q3",
+        "text": "Use the matrix to generate related words that keep the base spelling stable. Select at least four.",
+        "intent": "family"
+      },
+      {
+        "id": "q4",
+        "text": "Choose one selected word and write a word sum that resembles it. Include a join note.",
+        "intent": "join_convention"
+      },
+      {
+        "id": "q5",
+        "text": "Optional: Spell the whole word using your word sum + join note (feedback only).",
+        "intent": "spelling_rebuild"
+      }
+    ],
+    "supports": [
+      {
+        "type": "sentence_frame",
+        "content": "In this sentence, <stopping> means ________."
+      },
+      {
+        "type": "sentence_frame",
+        "content": "The base in this word family is <stop> because it carries the core meaning across related words."
+      },
+      {
+        "type": "sentence_frame",
+        "content": "One word I built is <____> = <stop> + <affix>."
+      },
+      {
+        "type": "sentence_frame",
+        "content": "Join note: The spelling changes by ________ because ________."
+      },
+      {
+        "type": "sentence_frame",
+        "content": "Spelling rebuild (optional): Start with <stop>. Apply the join step. Add the suffix to spell <________>."
+      }
+    ]
+  },
+  "response": {
+    "mode": "matrix_builder",
+    "requires_spelling_rebuild": false,
+    "spelling_rebuild_prompt": "Optional: Type the final spelled word you built from your word sum and join note.",
+    "spelling_rebuild_examples": ["stopping", "stopped"]
+  },
+  "scoring": {
+    "rubric": [
+      {
+        "criterion": "Selects multiple matrix-buildable words that preserve the base spelling",
+        "max_points": 3
+      },
+      {
+        "criterion": "Produces a word sum proof that resembles the chosen word",
+        "max_points": 2
+      },
+      {
+        "criterion": "Includes a join note supported by letter evidence",
+        "max_points": 2
+      },
+      {
+        "criterion": "Attempts to spell the whole word from the word sum + join note (feedback only)",
+        "max_points": 1
+      }
+    ],
+    "error_tags": ["meaning_error", "structure_error", "family_error", "join_error"],
+    "mastery_threshold": 0.75
+  },
+  "metadata": {
+    "tags": [
+      "matrix",
+      "cvc_double",
+      "tier2",
+      "stop",
+      "ed_ing_contrast",
+      "spelling_rebuild_optional"
+    ],
+    "notes_for_teacher": "This task highlights the doubling convention for CVC bases before vowel suffixes (<-ing>, <-ed>). Students should notice that the base spelling <stop> stays stable, and the final consonant doubles at the join. Spelling rebuild is optional and used for feedback, not gating."
+  }
 }
