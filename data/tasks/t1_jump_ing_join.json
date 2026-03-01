@@ -1,0 +1,94 @@
+{
+  "id": "t1_jump_ing_join",
+  "task_type": "join_convention_check",
+  "tier": 2,
+  "difficulty": 3,
+  "time_estimate_sec": 180,
+
+  "targets": {
+    "base": "jump",
+    "suffixes": ["ing"],
+    "words": ["jumping"],
+    "join_conventions": ["no_change_before_ing"]
+  },
+
+  "prompts": {
+    "stem": "We are building a word using a base and a suffix. Use meaning and structure first.",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "What meaning does <-ing> add to this word?",
+        "intent": "meaning"
+      },
+      {
+        "id": "q2",
+        "text": "Show the structure of the word.",
+        "intent": "structure"
+      },
+      {
+        "id": "q3",
+        "text": "Check the join. Does anything change when we add <-ing> to <jump>?",
+        "intent": "join_convention"
+      }
+    ],
+    "supports": [
+      {
+        "type": "sentence_frame",
+        "content": "The suffix <-ing> adds the meaning ________."
+      },
+      {
+        "type": "sentence_frame",
+        "content": "<jump> + <-ing> → <jumping> because ________."
+      }
+    ]
+  },
+
+  "response": {
+    "mode": "short_text",
+    "fields": [
+      {
+        "id": "meaning",
+        "label": "Meaning of <-ing>",
+        "field_type": "text"
+      },
+      {
+        "id": "structure",
+        "label": "Structure",
+        "field_type": "text"
+      },
+      {
+        "id": "join",
+        "label": "Join explanation",
+        "field_type": "text"
+      }
+    ]
+  },
+
+  "scoring": {
+    "rubric": [
+      {
+        "criterion": "Meaning statement reflects ongoing/process sense",
+        "max_points": 3
+      },
+      {
+        "criterion": "Structure correctly shows base + suffix",
+        "max_points": 2
+      },
+      {
+        "criterion": "Join explanation notes no spelling change",
+        "max_points": 2
+      }
+    ],
+    "error_tags": [
+      "meaning_error",
+      "structure_error",
+      "join_error"
+    ],
+    "mastery_threshold": 0.75
+  },
+
+  "metadata": {
+    "tags": ["ing", "tier2", "join_convention"],
+    "notes_for_teacher": "If learner defaults to sound-first rules, redirect to structural evidence."
+  }
+}
