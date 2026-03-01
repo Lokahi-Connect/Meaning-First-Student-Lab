@@ -8,11 +8,10 @@ type Props = {
   selected: string[];
   onChangeSelected: (next: string[]) => void;
 
-  // ✅ Proof requirement
-  proofWord: string; // the selected word they are proving
+  proofWord: string;
   onChangeProofWord: (next: string) => void;
 
-  wordSum: string; // the student’s written proof
+  wordSum: string;
   onChangeWordSum: (next: string) => void;
 };
 
@@ -26,8 +25,56 @@ function normalizeAffix(a: string) {
 
 function buildWord(prefix: string, base: string, suffix: string) {
   // v1 intentionally does NOT apply join conventions.
-  // The proof step is where we teach joins explicitly.
   return `${prefix}${base}${suffix}`;
+}
+
+function inferAffixForWordSum(args: {
+  proofWord: string;
+  base: string;
+  prefixes: string[];
+  suffixes: string[];
+}): { prefix: string; suffix: string } {
+  const w = (args.proofWord || "").toLowerCase();
+  const b = (args.base || "").toLowerCase();
+  const prefixes = args.prefixes.map((p) => (p || "").toLowerCase()).filter(Boolean);
+  const suffixes = args.suffixes.map((s) => (s || "").toLowerCase()).filter(Boolean);
+
+  // Find prefix: choose the longest prefix that matches the start of the word
+  let pre = "";
+  for (const p of prefixes) {
+    if (w.startsWith(p) && p.length > pre.length) pre = p;
+  }
+
+  // After removing prefix, the remainder should contain base + suffix
+  const afterPre = pre ? w.slice(pre.length) : w;
+
+  // Find suffix: choose the longest suffix that matches the end
+  let suf = "";
+  for (const s of suffixes) {
+    if (afterPre.endsWith(s) && s.length > suf.length) suf = s;
+  }
+
+  // Validate that base is present (best effort)
+  // We do not fail hard; we just return what we can infer.
+  const basePresent = afterPre.includes(b);
+  if (!basePresent) {
+    // If base isn’t found, don’t guess affixes too aggressively.
+    return { prefix: pre, suffix: suf };
+  }
+
+  return { prefix: pre, suffix: suf };
+}
+
+function formatWordSum(proofWord: string, base: string, prefix: string, suffix: string) {
+  const parts: string[] = [];
+
+  if (prefix) parts.push(`<${prefix}->`);
+  parts.push(`<${base}>`);
+  if (suffix) parts.push(`<-${suffix}>`);
+
+  const rightSide = parts.join(" + ");
+
+  return `<${proofWord}> = ${rightSide}\nJoin note: ________ because ________.`;
 }
 
 export function MatrixBuilder({
@@ -51,10 +98,8 @@ export function MatrixBuilder({
     const next = selected.includes(w) ? selected.filter((x) => x !== w) : [...selected, w];
     onChangeSelected(next);
 
-    // If no proof word chosen yet, set it to the first selected word.
     if (!proofWord && next.length) onChangeProofWord(next[0]);
 
-    // If proof word got unselected, move proof target to the first remaining selected word.
     if (proofWord && !next.includes(proofWord)) {
       onChangeProofWord(next[0] || "");
       onChangeWordSum("");
@@ -62,6 +107,20 @@ export function MatrixBuilder({
   }
 
   const hasSelected = selected.length > 0;
+
+  function startWordSumTemplate() {
+    if (!proofWord) return;
+
+    const { prefix, suffix } = inferAffixForWordSum({
+      proofWord,
+      base,
+      prefixes: P,
+      suffixes: S,
+    });
+
+    const template = formatWordSum(proofWord, base, prefix, suffix);
+    onChangeWordSum(template);
+  }
 
   return (
     <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, marginBottom: 12 }}>
@@ -172,7 +231,7 @@ export function MatrixBuilder({
         )}
       </div>
 
-      {/* ✅ Required proof step */}
+      {/* Proof step */}
       <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #ddd" }}>
         <div style={{ fontWeight: 800, marginBottom: 6 }}>Proof (required before Continue)</div>
 
@@ -209,17 +268,36 @@ export function MatrixBuilder({
             </select>
           </label>
 
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button
+              onClick={startWordSumTemplate}
+              disabled={!proofWord}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "1px solid #111",
+                background: proofWord ? "white" : "#f3f3f3",
+                cursor: proofWord ? "pointer" : "not-allowed",
+                fontWeight: 800,
+                opacity: proofWord ? 1 : 0.6,
+              }}
+              title="Prefills a structure template. You still explain the join."
+            >
+              Start my word sum
+            </button>
+
+            <div style={{ fontSize: 12, opacity: 0.75 }}>
+              (Template fills structure only, not the join reasoning.)
+            </div>
+          </div>
+
           <label style={{ fontWeight: 700 }}>
             Word sum proof
             <textarea
               value={wordSum}
               onChange={(e) => onChangeWordSum(e.target.value)}
-              rows={3}
-              placeholder={
-                proofWord
-                  ? `<${proofWord}> = <${base}> + <affix> (then explain the join if needed)`
-                  : "Choose a proof word first."
-              }
+              rows={4}
+              placeholder={proofWord ? "Write your proof here…" : "Choose a proof word first."}
               disabled={!proofWord}
               style={{
                 width: "100%",
@@ -230,15 +308,6 @@ export function MatrixBuilder({
               }}
             />
           </label>
-
-          <div style={{ fontSize: 12, opacity: 0.8 }}>
-            Sentence frames you can follow:
-            <ul style={{ margin: "6px 0 0 18px" }}>
-              <li>The base in this word family is &lt;____&gt;.</li>
-              <li>&lt;____&gt; = &lt;base&gt; + &lt;affix&gt;.</li>
-              <li>At the join, the spelling ________ because ________.</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
