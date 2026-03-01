@@ -63,10 +63,46 @@
       "required": ["base"],
       "properties": {
         "base": { "type": "string" },
+
         "prefixes": { "type": "array", "items": { "type": "string" } },
         "suffixes": { "type": "array", "items": { "type": "string" } },
-        "words": { "type": "array", "items": { "type": "string" } },
-        "join_conventions": { "type": "array", "items": { "type": "string" } }
+
+        "words": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Matrix-buildable words that preserve the base spelling (same orthographic base)."
+        },
+
+        "join_conventions": { "type": "array", "items": { "type": "string" } },
+
+        "family_relatives": {
+          "type": "array",
+          "description": "Related words that belong in the meaning family but are NOT necessarily matrix-buildable with the same base spelling.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["word", "relation_note"],
+            "properties": {
+              "word": { "type": "string" },
+              "relation_note": { "type": "string" }
+            }
+          }
+        },
+
+        "twin_bases": {
+          "type": "array",
+          "description": "Alternate base spellings that represent the same core meaning (explicitly labeled as twin bases).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["base", "example_words", "note"],
+            "properties": {
+              "base": { "type": "string" },
+              "example_words": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+              "note": { "type": "string" }
+            }
+          }
+        }
       }
     },
 
@@ -106,10 +142,7 @@
             "additionalProperties": false,
             "required": ["type", "content"],
             "properties": {
-              "type": {
-                "type": "string",
-                "enum": ["sentence_frame", "hint", "example", "definition"]
-              },
+              "type": { "type": "string", "enum": ["sentence_frame", "hint", "example", "definition"] },
               "content": { "type": "string" }
             }
           }
@@ -143,14 +176,7 @@
               "label": { "type": "string" },
               "field_type": {
                 "type": "string",
-                "enum": [
-                  "text",
-                  "choice",
-                  "morpheme_chip",
-                  "word_chip",
-                  "matrix_cell",
-                  "evidence_pick"
-                ]
+                "enum": ["text", "choice", "morpheme_chip", "word_chip", "matrix_cell", "evidence_pick"]
               },
               "options": { "type": "array", "items": { "type": "string" } }
             }
@@ -180,13 +206,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": [
-              "meaning_error",
-              "structure_error",
-              "family_error",
-              "join_error",
-              "grapheme_language_error"
-            ]
+            "enum": ["meaning_error", "structure_error", "family_error", "join_error", "grapheme_language_error"]
           }
         },
         "mastery_threshold": { "type": "number", "minimum": 0.5, "maximum": 1.0 }
