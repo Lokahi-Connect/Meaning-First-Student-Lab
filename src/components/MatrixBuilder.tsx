@@ -23,9 +23,73 @@ function normalizeAffix(a: string) {
   return (a || "").trim();
 }
 
+function isVowel(ch: string) {
+  return ["a", "e", "i", "o", "u"].includes(ch);
+}
+
+function startsWithVowel(s: string) {
+  const c = (s || "").toLowerCase().trim()[0] || "";
+  return isVowel(c);
+}
+
+function endsWithConsonant(s: string) {
+  const c = (s || "").toLowerCase().trim().slice(-1) || "";
+  return c !== "" && !isVowel(c);
+}
+
+// Basic CVC check (English has exceptions; v1 is intentionally simple)
+function isCVC(base: string) {
+  const b = (base || "").toLowerCase().trim();
+  if (b.length < 3) return false;
+  const a = b[b.length - 3];
+  const m = b[b.length - 2];
+  const z = b[b.length - 1];
+  if (!a || !m || !z) return false;
+
+  // Exclude w, x, y as final doubling targets in this simple rule
+  if (["w", "x", "y"].includes(z)) return false;
+
+  return !isVowel(a) && isVowel(m) && !isVowel(z);
+}
+
+function applyJoin(base: string, suffix: string) {
+  const b = (base || "").toLowerCase().trim();
+  const s = (suffix || "").toLowerCase().trim();
+
+  // No suffix
+  if (!s) return { stem: b, note: "no suffix" };
+
+  // Rule 1: Final <e> drop before vowel suffix (e.g., make + ing -> making)
+  if (b.endsWith("e") && startsWithVowel(s)) {
+    return { stem: b.slice(0, -1), note: "drop final <e> before a vowel suffix" };
+  }
+
+  // Rule 2: Final <y> -> <i> before suffix that does NOT start with <i>
+  // (try + ed -> tried). For <-ing>, keep y (try + ing -> trying).
+  if (b.endsWith("y") && endsWithConsonant(b.slice(0, -1)) && !s.startsWith("i")) {
+    return { stem: b.slice(0, -1) + "i", note: "change final <y> to <i> before this suffix" };
+  }
+
+  // Rule 3: Double final consonant in CVC base before vowel suffix (run + ing -> running)
+  // This is a simplified heuristic (works for run, hop, plan; not perfect for all English).
+  if (isCVC(b) && startsWithVowel(s)) {
+    const last = b[b.length - 1];
+    return { stem: b + last, note: "double final consonant before a vowel suffix" };
+  }
+
+  // Default: no spelling change at the join
+  return { stem: b, note: "no change at the join" };
+}
+
 function buildWord(prefix: string, base: string, suffix: string) {
-  // v1 intentionally does NOT apply join conventions.
-  return `${prefix}${base}${suffix}`;
+  const pre = (prefix || "").toLowerCase().trim();
+  const suf = (suffix || "").toLowerCase().trim();
+  const { stem, note } = applyJoin(base, suf);
+  return {
+    word: `${pre}${stem}${suf}`,
+    joinNote: note,
+    joinedBase: stem, // base after join adjustment (for display)
+  };
 }
 
 function inferAffixForWordSum(args: {
@@ -33,48 +97,33 @@ function inferAffixForWordSum(args: {
   base: string;
   prefixes: string[];
   suffixes: string[];
-}): { prefix: string; suffix: string } {
-  const w = (args.proofWord || "").toLowerCase();
-  const b = (args.base || "").toLowerCase();
-  const prefixes = args.prefixes.map((p) => (p || "").toLowerCase()).filter(Boolean);
-  const suffixes = args.suffixes.map((s) => (s || "").toLowerCase()).filter(Boolean);
+}) {
+  const w = (args.proofWord || "").toLowerCase().trim();
+  const b = (args.base || "").toLowerCase().trim();
+  const prefixes = args.prefixes.map((p) => (p || "").toLowerCase().trim()).filter(Boolean);
+  const suffixes = args.suffixes.map((s) => (s || "").toLowerCase().trim()).filter(Boolean);
 
-  // Find prefix: choose the longest prefix that matches the start of the word
+  // Longest matching prefix
   let pre = "";
-  for (const p of prefixes) {
-    if (w.startsWith(p) && p.length > pre.length) pre = p;
-  }
+  for (const p of prefixes) if (w.startsWith(p) && p.length > pre.length) pre = p;
 
-  // After removing prefix, the remainder should contain base + suffix
   const afterPre = pre ? w.slice(pre.length) : w;
 
-  // Find suffix: choose the longest suffix that matches the end
+  // Longest matching suffix
   let suf = "";
-  for (const s of suffixes) {
-    if (afterPre.endsWith(s) && s.length > suf.length) suf = s;
-  }
+  for (const s of suffixes) if (afterPre.endsWith(s) && s.length > suf.length) suf = s;
 
-  // Validate that base is present (best effort)
-  // We do not fail hard; we just return what we can infer.
-  const basePresent = afterPre.includes(b);
-  if (!basePresent) {
-    // If base isn’t found, don’t guess affixes too aggressively.
-    return { prefix: pre, suffix: suf };
-  }
-
-  return { prefix: pre, suffix: suf };
+  // Best-effort only
+  return { prefix: pre, suffix: suf, base: b };
 }
 
 function formatWordSum(proofWord: string, base: string, prefix: string, suffix: string) {
   const parts: string[] = [];
-
   if (prefix) parts.push(`<${prefix}->`);
   parts.push(`<${base}>`);
   if (suffix) parts.push(`<-${suffix}>`);
 
-  const rightSide = parts.join(" + ");
-
-  return `<${proofWord}> = ${rightSide}\nJoin note: ________ because ________.`;
+  return `<${proofWord}> = ${parts.join(" + ")}\nJoin note: ________ because ________.`;
 }
 
 export function MatrixBuilder({
@@ -111,14 +160,14 @@ export function MatrixBuilder({
   function startWordSumTemplate() {
     if (!proofWord) return;
 
-    const { prefix, suffix } = inferAffixForWordSum({
+    const inferred = inferAffixForWordSum({
       proofWord,
       base,
       prefixes: P,
       suffixes: S,
     });
 
-    const template = formatWordSum(proofWord, base, prefix, suffix);
+    const template = formatWordSum(proofWord, base, inferred.prefix, inferred.suffix);
     onChangeWordSum(template);
   }
 
@@ -176,7 +225,8 @@ export function MatrixBuilder({
                 </td>
 
                 {right.map((suf) => {
-                  const w = buildWord(pre, base, suf);
+                  const built = buildWord(pre, base, suf);
+                  const w = built.word;
                   const isSelected = selected.includes(w);
 
                   return (
@@ -192,11 +242,14 @@ export function MatrixBuilder({
                           background: isSelected ? "#fff3b0" : "white",
                           cursor: "pointer",
                           fontWeight: 800,
-                          minWidth: 150,
+                          minWidth: 170,
                         }}
-                        title="Click to select as evidence"
+                        title={`Join note: ${built.joinNote}`}
                       >
                         {w}
+                        <div style={{ fontSize: 11, opacity: 0.75, marginTop: 4 }}>
+                          join: {built.joinNote}
+                        </div>
                       </button>
                     </td>
                   );
@@ -231,7 +284,6 @@ export function MatrixBuilder({
         )}
       </div>
 
-      {/* Proof step */}
       <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #ddd" }}>
         <div style={{ fontWeight: 800, marginBottom: 6 }}>Proof (required before Continue)</div>
 
@@ -287,7 +339,7 @@ export function MatrixBuilder({
             </button>
 
             <div style={{ fontSize: 12, opacity: 0.75 }}>
-              (Template fills structure only, not the join reasoning.)
+              (Template fills structure only; you write the join reasoning.)
             </div>
           </div>
 
