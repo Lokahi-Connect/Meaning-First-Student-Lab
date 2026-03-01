@@ -1,0 +1,91 @@
+{
+  "id": "t4_matrix_jump",
+  "task_type": "matrix_build",
+  "tier": 2,
+  "difficulty": 4,
+  "time_estimate_sec": 300,
+
+  "context": {
+    "sentences": [
+      "The puppy is jumping over the puddle.",
+      "After the rain, they jumped across the stream."
+    ],
+    "target_word": "jumping",
+    "gloss": "in the process of jumping (happening now)",
+    "audio": {
+      "src": "/audio/t4_matrix_jump.mp3",
+      "caption": "Listen to the sentences"
+    }
+  },
+
+  "targets": {
+    "base": "jump",
+    "prefixes": ["re"],
+    "suffixes": ["s", "ed", "ing"],
+    "words": [
+      "jump",
+      "jumps",
+      "jumped",
+      "jumping",
+      "rejump",
+      "rejumps",
+      "rejumped",
+      "rejumping"
+    ]
+  },
+
+  "prompts": {
+    "stem": "Build a matrix for this base. Select words you can justify as members of the word family.",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "What is the base in this word family?",
+        "intent": "structure"
+      },
+      {
+        "id": "q2",
+        "text": "Use the matrix to generate related words. Select at least four.",
+        "intent": "family"
+      },
+      {
+        "id": "q3",
+        "text": "Choose one word and explain how it is built.",
+        "intent": "structure"
+      }
+    ],
+    "supports": [
+      {
+        "type": "sentence_frame",
+        "content": "The base is <____>."
+      },
+      {
+        "type": "sentence_frame",
+        "content": "One word I built is <____> = <base> + <affix>."
+      }
+    ]
+  },
+
+  "response": {
+    "mode": "matrix_builder"
+  },
+
+  "scoring": {
+    "rubric": [
+      {
+        "criterion": "Selects multiple related words as evidence",
+        "max_points": 3
+      },
+      {
+        "criterion": "Names base and uses structural language",
+        "max_points": 2
+      }
+    ],
+    "error_tags": ["structure_error", "family_error"],
+    "mastery_threshold": 0.75
+  },
+
+  "metadata": {
+    "tags": ["matrix", "tier2", "word_family"],
+    "notes_for_teacher": "Use selected words as evidence for word family reasoning."
+  }
+}
