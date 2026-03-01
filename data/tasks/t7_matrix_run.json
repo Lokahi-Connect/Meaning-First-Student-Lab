@@ -21,81 +21,56 @@
   "targets": {
     "base": "run",
     "prefixes": ["re"],
-    "suffixes": ["s", "ed", "ing"],
+    "suffixes": ["s", "ing"],
+
     "words": [
       "run",
       "runs",
-      "ran",
       "running",
       "rerun",
       "reruns",
-      "reran",
       "rerunning"
+    ],
+
+    "family_relatives": [
+      {
+        "word": "ran",
+        "relation_note": "Meaning-related family member, but not built by adding a suffix to the spelling <run>."
+      }
+    ],
+
+    "twin_bases": [
+      {
+        "base": "ran",
+        "example_words": ["ran"],
+        "note": "Twin-base/alternate historical form linked to the meaning family of <run>."
+      }
     ]
   },
 
   "prompts": {
-    "stem": "Build a matrix for this base. Select words you can justify as members of the word family, then prove one with a word sum and a join note.",
+    "stem": "Build a matrix for this base. Select words that keep the base spelling stable, then prove one with a word sum and a join note.",
     "questions": [
-      {
-        "id": "q1",
-        "text": "In the sentences, what does <running> mean?",
-        "intent": "meaning"
-      },
-      {
-        "id": "q2",
-        "text": "What base carries the core meaning across this word family?",
-        "intent": "structure"
-      },
-      {
-        "id": "q3",
-        "text": "Use the matrix to generate related words. Select at least four as evidence.",
-        "intent": "family"
-      },
-      {
-        "id": "q4",
-        "text": "Choose one selected word and write a word sum that resembles it. Include a join note supported by letter evidence.",
-        "intent": "join_convention"
-      }
+      { "id": "q1", "text": "In the sentence context, what does <running> mean?", "intent": "meaning" },
+      { "id": "q2", "text": "What is the base that carries the core meaning across the matrix words?", "intent": "structure" },
+      { "id": "q3", "text": "Use the matrix to generate related words that keep the base spelling stable. Select at least four.", "intent": "family" },
+      { "id": "q4", "text": "Choose one selected word and write a word sum that resembles it. Include a join note.", "intent": "join_convention" }
     ],
     "supports": [
-      {
-        "type": "sentence_frame",
-        "content": "In this sentence, <running> means ________."
-      },
-      {
-        "type": "sentence_frame",
-        "content": "The base in this word family is <____> because it carries the core meaning across related words."
-      },
-      {
-        "type": "sentence_frame",
-        "content": "One word I built is <____> = <base> + <affix>. The affix adds the meaning ________."
-      },
-      {
-        "type": "sentence_frame",
-        "content": "At the join, the spelling ________ because ________."
-      }
+      { "type": "sentence_frame", "content": "In this sentence, <running> means ________." },
+      { "type": "sentence_frame", "content": "The base in this word family is <____> because it carries the core meaning across related words." },
+      { "type": "sentence_frame", "content": "One word I built is <____> = <base> + <affix>. The affix adds the meaning ________." },
+      { "type": "sentence_frame", "content": "At the join, the spelling ________ because ________." }
     ]
   },
 
-  "response": {
-    "mode": "matrix_builder"
-  },
+  "response": { "mode": "matrix_builder" },
 
   "scoring": {
     "rubric": [
-      {
-        "criterion": "Selects multiple related words as evidence",
-        "max_points": 3
-      },
-      {
-        "criterion": "Produces a word sum proof that resembles the chosen word",
-        "max_points": 2
-      },
-      {
-        "criterion": "Includes a join note supported by letter evidence",
-        "max_points": 2
-      }
+      { "criterion": "Selects multiple matrix-buildable words that preserve the base spelling", "max_points": 3 },
+      { "criterion": "Produces a word sum proof that resembles the chosen word", "max_points": 2 },
+      { "criterion": "Includes a join note supported by letter evidence", "max_points": 2 }
     ],
     "error_tags": ["meaning_error", "structure_error", "family_error", "join_error"],
     "mastery_threshold": 0.75
@@ -103,6 +78,6 @@
 
   "metadata": {
     "tags": ["matrix", "cvc_double", "tier2", "word_family"],
-    "notes_for_teacher": "This matrix is designed to surface consonant doubling before <-ing> (run→running). Note: ‘ran’ is a related word but not base+suffix; treat it as a family member with a different historical form."
+    "notes_for_teacher": "Matrix words preserve the base spelling <run>. Treat <ran> as a family relative / twin-base example."
   }
 }
