@@ -17,33 +17,35 @@ export default function App() {
   const task = useMemo(() => getTask(taskId), [taskId]);
 
   function handleCheckEvidence() {
-    const g = guideV1(task, responses);
+    const guidance = guideV1(task, responses);
 
-    if (g.supported) {
+    if (guidance.supported) {
       setMediatorTitle("Supported ✅");
-      setMediatorPrompts(g.prompts);
-      setStatusText("Your explanation is supported by evidence. You can continue.");
+      setMediatorPrompts(guidance.prompts);
+      setStatusText("Your explanation is supported by evidence.");
       setCanContinue(true);
     } else {
       setMediatorTitle("Not yet supported");
-      setMediatorPrompts(g.prompts);
-      setStatusText("Revise using the prompts above, then check again.");
+      setMediatorPrompts(guidance.prompts);
+      setStatusText("Revise using the prompts above.");
       setCanContinue(false);
     }
   }
 
   function handleContinue() {
-    const g = guideV1(task, responses);
-    if (!g.supported) {
-      // guardrail: don’t route unless supported
+    // 🔒 HARD ENFORCEMENT: re-check before routing
+    const guidance = guideV1(task, responses);
+
+    if (!guidance.supported) {
       setMediatorTitle("Not yet supported");
-      setMediatorPrompts(g.prompts);
-      setStatusText("Before continuing: revise until your explanation is supported.");
+      setMediatorPrompts(guidance.prompts);
+      setStatusText("You must complete the required proof before continuing.");
       setCanContinue(false);
       return;
     }
 
-    const next = nextTaskId(task, { mastered: true, error_tags: [] }); // routing on supported only (v1)
+    const next = nextTaskId(task, { mastered: true, error_tags: [] });
+
     if (next) {
       setTaskId(next);
       setResponses({});
