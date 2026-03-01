@@ -4,43 +4,58 @@
   "tier": 2,
   "difficulty": 5,
   "time_estimate_sec": 240,
+
+  "context": {
+    "sentence": "Dad is baking muffins for the class.",
+    "target_word": "baking",
+    "gloss": "in the process of baking (doing it now)"
+  },
+
   "targets": {
     "base": "bake",
     "suffixes": ["ing"],
     "words": ["baking"],
     "join_conventions": ["final_e_drop_before_vowel_suffix"]
   },
+
   "prompts": {
-    "stem": "Transfer: use what you know about joins to build a new word.",
+    "stem": "Transfer: anchor meaning in the sentence, then apply the same join reasoning to a new base.",
     "questions": [
-      { "id": "q1", "text": "Show the structure for the word you build.", "intent": "structure" },
-      { "id": "q2", "text": "What happens at the join, and why?", "intent": "join_convention" },
-      { "id": "q3", "text": "Name one related word that helps you keep the base spelling in mind.", "intent": "family" }
+      { "id": "q1", "text": "In this sentence, what does <baking> mean?", "intent": "meaning" },
+      { "id": "q2", "text": "Show the structure for the word you build.", "intent": "structure" },
+      { "id": "q3", "text": "What happens at the join, and why?", "intent": "join_convention" },
+      { "id": "q4", "text": "Name one related word that helps you keep the base spelling in mind.", "intent": "family" }
     ],
     "supports": [
-      { "type": "sentence_frame", "content": "<bake> + <-ing> → ________ because ________." },
+      { "type": "sentence_frame", "content": "In this sentence, <baking> means ________." },
+      { "type": "sentence_frame", "content": "<bake> + <-ing> → <baking> because ________." },
       { "type": "sentence_frame", "content": "A related word is ________." }
     ]
   },
+
   "response": {
     "mode": "short_text",
     "fields": [
+      { "id": "meaning", "label": "Meaning in the sentence", "field_type": "text" },
       { "id": "structure", "label": "Structure", "field_type": "text" },
       { "id": "join", "label": "Join explanation", "field_type": "text" },
       { "id": "family", "label": "Related word evidence", "field_type": "text" }
     ]
   },
+
   "scoring": {
     "rubric": [
+      { "criterion": "Meaning matches sentence use", "max_points": 2 },
       { "criterion": "Structure shows base + suffix", "max_points": 2 },
-      { "criterion": "Join explanation correctly applies final <e> drop", "max_points": 3 },
-      { "criterion": "Related word supports base spelling (e.g., <bake>, <baker>, <baked>)", "max_points": 2 }
+      { "criterion": "Join explanation applies the convention with evidence", "max_points": 3 },
+      { "criterion": "Related word supports base spelling", "max_points": 2 }
     ],
-    "error_tags": ["structure_error", "join_error", "family_error"],
+    "error_tags": ["meaning_error", "structure_error", "join_error", "family_error"],
     "mastery_threshold": 0.75
   },
+
   "metadata": {
     "tags": ["transfer", "ing", "final_e", "tier2"],
-    "notes_for_teacher": "If transfer fails, return to explicit contrast joins (make/making, take/taking, bake/baking)."
+    "notes_for_teacher": "Keep the meaning anchored to the sentence before transfer."
   }
 }
