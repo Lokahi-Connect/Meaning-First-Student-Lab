@@ -73,6 +73,7 @@ export function TaskRunner({
 }: Props) {
   const ctx: any = (task as any).context || {};
   const targets: any = (task as any).targets || {};
+  const responseCfg: any = (task as any).response || {};
 
   const sentences: string[] = Array.isArray(ctx.sentences)
     ? ctx.sentences
@@ -81,6 +82,7 @@ export function TaskRunner({
     : [];
 
   const targetWord = ctx.target_word || "";
+  const baseFocus = ctx.base_focus || targets.base || "";
   const gloss = ctx.gloss || "";
   const audio = ctx.audio;
 
@@ -94,9 +96,7 @@ export function TaskRunner({
   // Prefixes are hidden unless explicitly enabled in task JSON:
   // "allow_prefixes": true
   const allowPrefixes = Boolean((task as any).allow_prefixes);
-  const gatedPrefixes: string[] = allowPrefixes
-    ? targets.prefixes || []
-    : [];
+  const gatedPrefixes: string[] = allowPrefixes ? targets.prefixes || [] : [];
 
   const matrixSelected: string[] = (() => {
     try {
@@ -109,6 +109,27 @@ export function TaskRunner({
   const proofWord = (responses as any).matrix_proof_word || "";
   const wordSum = (responses as any).matrix_word_sum || "";
 
+  // ----------------------------
+  // OPTIONAL SPELLING REBUILD (Feedback-only unless you gate it later)
+  // ----------------------------
+  const hasSpellingRebuildUI = Boolean(
+    responseCfg?.spelling_rebuild_prompt ||
+      (Array.isArray(responseCfg?.spelling_rebuild_examples) &&
+        responseCfg.spelling_rebuild_examples.length > 0) ||
+      responseCfg?.requires_spelling_rebuild === true ||
+      responseCfg?.requires_spelling_rebuild === false
+  );
+
+  const spellingRebuild = (responses as any).spelling_rebuild || "";
+  const spellingRebuildPrompt =
+    responseCfg?.spelling_rebuild_prompt ||
+    "Optional: Type the final spelled word you built from your word sum and join note.";
+  const spellingRebuildExamples: string[] = Array.isArray(
+    responseCfg?.spelling_rebuild_examples
+  )
+    ? responseCfg.spelling_rebuild_examples
+    : [];
+
   return (
     <div
       style={{
@@ -118,9 +139,7 @@ export function TaskRunner({
         lineHeight: 1.4,
       }}
     >
-      <h1 style={{ fontSize: 22, marginBottom: 8 }}>
-        Meaning-First Student Lab
-      </h1>
+      <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
 
       <div style={{ display: "grid", gap: 12 }}>
         {/* ---------------- Context Block ---------------- */}
@@ -138,43 +157,36 @@ export function TaskRunner({
               </div>
 
               {sentences.map((s, idx) => (
-                <div
-                  key={idx}
-                  style={{ fontSize: 16, marginBottom: 6 }}
-                >
-                  <HighlightedSentence
-                    sentence={s}
-                    target={targetWord}
-                  />
+                <div key={idx} style={{ fontSize: 16, marginBottom: 6 }}>
+                  <HighlightedSentence sentence={s} target={targetWord} />
                 </div>
               ))}
 
               <div style={{ fontSize: 13, opacity: 0.85 }}>
                 Target word: <strong>{targetWord}</strong>
+                {baseFocus ? (
+                  <>
+                    {" "}
+                    | Base under investigation: <strong>&lt;{baseFocus}&gt;</strong>
+                  </>
+                ) : null}
                 {showGloss && gloss ? (
                   <>
                     {" "}
-                    | Common meaning here:{" "}
-                    <strong>{gloss}</strong>
+                    | Common meaning here: <strong>{gloss}</strong>
                   </>
                 ) : null}
               </div>
 
               {audio?.src ? (
                 <div style={{ marginTop: 8 }}>
-                  <audio
-                    controls
-                    src={audio.src}
-                    style={{ width: "100%" }}
-                  />
+                  <audio controls src={audio.src} style={{ width: "100%" }} />
                 </div>
               ) : null}
             </div>
           ) : null}
 
-          <div style={{ fontSize: 16, marginBottom: 8 }}>
-            {task.prompts.stem}
-          </div>
+          <div style={{ fontSize: 16, marginBottom: 8 }}>{task.prompts.stem}</div>
 
           <ol style={{ paddingLeft: 18, margin: 0 }}>
             {task.prompts.questions.map((q) => (
@@ -195,15 +207,8 @@ export function TaskRunner({
             }}
           >
             {!allowPrefixes && (
-              <div
-                style={{
-                  fontSize: 13,
-                  opacity: 0.7,
-                  marginBottom: 8,
-                }}
-              >
-                In this phase, we are building with bases and
-                suffixes only.
+              <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 8 }}>
+                In this phase, we are building with bases and suffixes only.
               </div>
             )}
 
@@ -235,6 +240,56 @@ export function TaskRunner({
                 })
               }
             />
+
+            {/* ---------------- Optional Spelling Rebuild ---------------- */}
+            {hasSpellingRebuildUI && (
+              <div
+                style={{
+                  marginTop: 12,
+                  paddingTop: 12,
+                  borderTop: "1px solid #eee",
+                }}
+              >
+                <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                  Spelling rebuild (feedback only)
+                </div>
+                <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 8 }}>
+                  {spellingRebuildPrompt}
+                  {spellingRebuildExamples.length > 0 ? (
+                    <>
+                      {" "}
+                      Examples:{" "}
+                      <strong>{spellingRebuildExamples.join(", ")}</strong>
+                    </>
+                  ) : null}
+                </div>
+
+                <input
+                  value={spellingRebuild}
+                  onChange={(e) =>
+                    setResponses({
+                      ...responses,
+                      spelling_rebuild: e.target.value,
+                    })
+                  }
+                  placeholder={
+                    spellingRebuildExamples.length > 0
+                      ? spellingRebuildExamples[0]
+                      : "Type the word you built…"
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: "1px solid #ddd",
+                    fontSize: 16,
+                  }}
+                />
+                <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
+                  Tip: Start with the base, apply the join step, then add the suffix.
+                </div>
+              </div>
+            )}
           </div>
         ) : null}
 
@@ -255,25 +310,11 @@ export function TaskRunner({
 
             {immediateFamily.length > 0 && (
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontWeight: 700 }}>
-                  Immediate Family
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    opacity: 0.8,
-                    marginBottom: 4,
-                  }}
-                >
+                <div style={{ fontWeight: 700 }}>Immediate Family</div>
+                <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
                   These words share the same base element.
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 8,
-                  }}
-                >
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {immediateFamily.map((w: string) => (
                     <span
                       key={w}
@@ -294,26 +335,14 @@ export function TaskRunner({
 
             {relatedForms.length > 0 && (
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontWeight: 700 }}>
-                  Related Forms
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    opacity: 0.8,
-                    marginBottom: 4,
-                  }}
-                >
-                  Meaning-related but not built by keeping the
-                  same base spelling in a matrix.
+                <div style={{ fontWeight: 700 }}>Related Forms</div>
+                <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
+                  Meaning-related but not built by keeping the same base spelling in a
+                  matrix.
                 </div>
                 {relatedForms.map((r: any) => (
-                  <div
-                    key={r.word}
-                    style={{ marginBottom: 4 }}
-                  >
-                    <strong>{r.word}</strong> —{" "}
-                    {r.relation_note}
+                  <div key={r.word} style={{ marginBottom: 4 }}>
+                    <strong>{r.word}</strong> — {r.relation_note}
                   </div>
                 ))}
               </div>
@@ -321,26 +350,13 @@ export function TaskRunner({
 
             {twinBases.length > 0 && (
               <div>
-                <div style={{ fontWeight: 700 }}>
-                  Twin Bases
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    opacity: 0.8,
-                    marginBottom: 4,
-                  }}
-                >
-                  Alternate base spellings representing the
-                  same core meaning.
+                <div style={{ fontWeight: 700 }}>Twin Bases</div>
+                <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 4 }}>
+                  Alternate base spellings representing the same core meaning.
                 </div>
                 {twinBases.map((t: any) => (
-                  <div
-                    key={t.base}
-                    style={{ marginBottom: 4 }}
-                  >
-                    <strong>&lt;{t.base}&gt;</strong> —{" "}
-                    {t.note}
+                  <div key={t.base} style={{ marginBottom: 4 }}>
+                    <strong>&lt;{t.base}&gt;</strong> — {t.note}
                   </div>
                 ))}
               </div>
@@ -369,10 +385,7 @@ export function TaskRunner({
               ))}
             </ul>
           ) : (
-            <div>
-              Write your responses, then click “Check my
-              evidence”.
-            </div>
+            <div>Write your responses, then click “Check my evidence”.</div>
           )}
 
           <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
@@ -407,11 +420,7 @@ export function TaskRunner({
             </button>
           </div>
 
-          {statusText ? (
-            <div style={{ marginTop: 10 }}>
-              {statusText}
-            </div>
-          ) : null}
+          {statusText ? <div style={{ marginTop: 10 }}>{statusText}</div> : null}
         </div>
       </div>
     </div>
