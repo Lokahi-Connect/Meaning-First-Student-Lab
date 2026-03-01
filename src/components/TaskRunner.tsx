@@ -1,6 +1,7 @@
 import React from "react";
 import type { Task } from "../data/taskIndex";
 import type { ResponseMap } from "../scoring/scoreV1";
+import { MatrixBuilder } from "./MatrixBuilder";
 
 type Props = {
   task: Task;
@@ -14,6 +15,8 @@ type Props = {
   mediatorTitle?: string;
   mediatorPrompts?: string[];
   canContinue?: boolean;
+
+  showGloss?: boolean;
 };
 
 function escapeRegExp(s: string) {
@@ -21,7 +24,7 @@ function escapeRegExp(s: string) {
 }
 
 function HighlightedSentence({ sentence, target }: { sentence: string; target: string }) {
-  const t = target.trim();
+  const t = (target || "").trim();
   if (!t) return <span>{sentence}</span>;
 
   const re = new RegExp(`(${escapeRegExp(t)})`, "gi");
@@ -34,11 +37,7 @@ function HighlightedSentence({ sentence, target }: { sentence: string; target: s
         return isMatch ? (
           <mark
             key={i}
-            style={{
-              padding: "0 4px",
-              borderRadius: 6,
-              background: "#fff3b0"
-            }}
+            style={{ padding: "0 4px", borderRadius: 6, background: "#fff3b0" }}
           >
             {p}
           </mark>
@@ -60,45 +59,70 @@ export function TaskRunner({
   mediatorTitle,
   mediatorPrompts,
   canContinue,
+  showGloss = true,
 }: Props) {
   const fields = task.response.fields || [];
-  const sentences = task.context?.sentences || [];
-  const targetWord = task.context?.target_word || "";
+
+  // Supports both:
+  // - context.sentences (new)
+  // - context.sentence (old)
+  const ctx: any = (task as any).context || {};
+  const sentences: string[] = Array.isArray(ctx.sentences)
+    ? ctx.sentences
+    : typeof ctx.sentence === "string"
+      ? [ctx.sentence]
+      : [];
+
+  const targetWord = ctx.target_word || "";
+  const gloss = ctx.gloss || "";
+  const audio = ctx.audio;
+
+  // Matrix selected storage
+  const matrixSelected: string[] = (() => {
+    try {
+      return JSON.parse((responses as any).matrix_selected || "[]");
+    } catch {
+      return [];
+    }
+  })();
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: 16, lineHeight: 1.4 }}>
       <h1 style={{ fontSize: 22, marginBottom: 8 }}>Meaning-First Student Lab</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+        {/* Prompt + sentence-first context */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-          {/* Sentence-first context block */}
-          <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 12, marginBottom: 10 }}>
-            <div style={{ fontWeight: 800, marginBottom: 6 }}>Sentence context</div>
+          {sentences.length ? (
+            <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, marginBottom: 10 }}>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>Sentence context</div>
 
-            {sentences.map((s: string, idx: number) => (
-              <div key={idx} style={{ fontSize: 16, marginBottom: 6 }}>
-                <HighlightedSentence sentence={s} target={targetWord} />
+              {sentences.map((s, idx) => (
+                <div key={idx} style={{ fontSize: 16, marginBottom: 6 }}>
+                  <HighlightedSentence sentence={s} target={targetWord} />
+                </div>
+              ))}
+
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>
+                Target word: <strong>{targetWord}</strong>
+                {showGloss && gloss ? (
+                  <>
+                    {" "}
+                    | Common meaning here: <strong>{gloss}</strong>
+                  </>
+                ) : null}
               </div>
-            ))}
 
-            <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>
-              Target word: <strong>{task.context.target_word}</strong>
-              {"  "} | {"  "}
-              Common meaning here: <strong>{task.context.gloss}</strong>
+              {audio?.src ? (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                    {audio.caption || "Listen"}
+                  </div>
+                  <audio controls src={audio.src} style={{ width: "100%" }} />
+                </div>
+              ) : null}
             </div>
-
-            {task.context.audio?.src ? (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                  {task.context.audio.caption || "Listen"}
-                </div>
-                <audio controls src={task.context.audio.src} style={{ width: "100%" }} />
-                <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
-                  Tip: listen once for meaning, then again while you look at the highlighted word.
-                </div>
-              </div>
-            ) : null}
-          </div>
+          ) : null}
 
           <div style={{ fontSize: 16, marginBottom: 8 }}>{task.prompts.stem}</div>
 
@@ -124,22 +148,43 @@ export function TaskRunner({
           ) : null}
         </div>
 
+        {/* Responses */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>Your responses</div>
 
-          {fields.map((f) => (
-            <div key={f.id} style={{ marginBottom: 10 }}>
-              <label style={{ display: "block", fontWeight: 700, marginBottom: 4 }}>
-                {f.label}
-              </label>
-              <textarea
-                value={responses[f.id] || ""}
-                onChange={(e) => setResponses({ ...responses, [f.id]: e.target.value })}
-                rows={3}
-                style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
-              />
-            </div>
-          ))}
+          {/* ✅ Matrix builder renders HERE when the task mode is matrix_builder */}
+          {task.response.mode === "matrix_builder" ? (
+            <MatrixBuilder
+              base={task.targets.base}
+              prefixes={task.targets.prefixes || []}
+              suffixes={task.targets.suffixes || []}
+              selected={matrixSelected}
+              onChangeSelected={(next) =>
+                setResponses({
+                  ...responses,
+                  matrix_selected: JSON.stringify(next),
+                  family: next.join(", ")
+                })
+              }
+            />
+          ) : null}
+
+          {/* Textareas only for non-matrix tasks */}
+          {task.response.mode !== "matrix_builder"
+            ? fields.map((f) => (
+                <div key={f.id} style={{ marginBottom: 10 }}>
+                  <label style={{ display: "block", fontWeight: 700, marginBottom: 4 }}>
+                    {f.label}
+                  </label>
+                  <textarea
+                    value={(responses as any)[f.id] || ""}
+                    onChange={(e) => setResponses({ ...responses, [f.id]: e.target.value })}
+                    rows={3}
+                    style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
+                  />
+                </div>
+              ))
+            : null}
 
           <div style={{ display: "flex", gap: 10 }}>
             <button
@@ -176,6 +221,7 @@ export function TaskRunner({
           {statusText ? <div style={{ marginTop: 10 }}>{statusText}</div> : null}
         </div>
 
+        {/* Mediator */}
         <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
           <div style={{ fontWeight: 800, marginBottom: 8 }}>{mediatorTitle || "Mediator"}</div>
           {mediatorPrompts?.length ? (
